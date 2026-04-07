@@ -1331,7 +1331,7 @@ display(
     intro.className = "section-local-control__intro";
     intro.innerHTML = `
       <p>
-        For count <strong>${activeCount}</strong>, reorder the table alphabetically by surname or by candidate status.
+        For count <strong>${activeCount}</strong>, explore votes alphabetically by surname or by candidate status.
       </p>
     `;
 
@@ -1696,12 +1696,37 @@ display(
       return;
     }
 
-    const href = await downloadHrefPromise;
+    const rows = await getFinalRows();
     if (!isCurrent()) return;
+
+    const cleanedRows = rows.map((d) => ({
+      constituency: d.constituency ?? "",
+      candidate: getDisplayNameFromElection(d.name) ?? "",
+      party: d.party ?? "",
+      count: d.count ?? "",
+      votes: d.votes ?? 0,
+      transfer: d.transfer ?? 0,
+      status: d.status ?? "",
+      quota: d.quota ?? 0,
+      seats: d.seats ?? 0
+    }));
+
+    const csv = "\uFEFF" + d3.csvFormat(cleanedRows);
+
+    const blob = new Blob([csv], {
+      type: "text/csv;charset=utf-8;"
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    if (el.dataset.downloadUrl) {
+      URL.revokeObjectURL(el.dataset.downloadUrl);
+    }
+    el.dataset.downloadUrl = url;
 
     const link = document.createElement("a");
     link.className = "pq-download";
-    link.href = href;
+    link.href = url;
     link.download = "dail_election_results_2024.csv";
     link.textContent = "Download 2024 general election dataset";
 
