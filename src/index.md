@@ -217,6 +217,24 @@ function getDisplayNameFromElection(name) {
   return `${clean(rest)} ${clean(surname)}`;
 }
 
+function fixPlotAria(svgOrRoot) {
+  const root =
+    svgOrRoot instanceof SVGElement
+      ? svgOrRoot
+      : svgOrRoot?.querySelector?.("svg");
+
+  if (!root) return;
+
+  root.querySelectorAll("g[aria-label]").forEach((node) => {
+    const role = node.getAttribute("role");
+    const labelledBy = node.getAttribute("aria-labelledby");
+
+    if (!role && !labelledBy) {
+      node.removeAttribute("aria-label");
+    }
+  });
+}
+
 function getColorChoices(rows) {
   const partiesPalette = [
     { name: "Fianna Fáil", value: "#40b34e" },
@@ -555,6 +573,8 @@ function renderQuotaWaffleChunk(rows, { width = 1000 } = {}) {
       })
     ]
   });
+
+  fixPlotAria(chart);
 
   const overlay = document.createElement("div");
   overlay.className = "election-waffle-overlay";
@@ -1275,6 +1295,8 @@ display(
       ]
     });
 
+    fixPlotAria(chart);
+
     wrap.appendChild(chart);
     el.replaceChildren(wrap);
   })
@@ -1594,6 +1616,8 @@ display(
         Plot.ruleY([0])
       ]
     });
+
+    fixPlotAria(chart);
 
     wrap.appendChild(chart);
     el.replaceChildren(wrap);

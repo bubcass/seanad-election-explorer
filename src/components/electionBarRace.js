@@ -1,18 +1,17 @@
 import * as d3 from "npm:d3";
 
 const DEFAULT_PARTY_COLORS = new Map([
-  ["Fianna Fáil", "#40b34e"],
+  ["Fianna Fáil", "#2c8737"],
   ["Sinn Féin", "#088460"],
   ["Fine Gael", "#303591"],
   ["Independent", "#666666"],
-  ["Non-party", "#666666"],
   ["Labour Party", "#c82832"],
   ["Social Democrats", "#782b81"],
-  ["Independent Ireland", "#17becf"],
-  ["People Before Profit-Solidarity", "#c5568b"],
-  ["Aontú", "#ff7f0e"],
+  ["Independent Ireland", "#087b87"],
+  ["People Before Profit-Solidarity", "#be417d"],
+  ["Aontú", "#b35400"],
   ["100% RDR", "#985564"],
-  ["Green Party", "#b4d143"],
+  ["Green Party", "#6c7e26"],
   ["Irish Freedom Party", "#1f77b4"],
   ["Liberty Republic", "#ff7f0e"],
 ]);
