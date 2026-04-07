@@ -519,7 +519,8 @@ function renderQuotaWaffleChunk(rows, { width = 1000 } = {}) {
     marginTop: 12,
     marginBottom: 100,
     fx: {
-      padding: 0.3
+      padding: 0.3,
+      domain: rows.map((d) => d.displayName)
     },
     marks: [
       Plot.axisFx({
@@ -555,74 +556,67 @@ function renderQuotaWaffleChunk(rows, { width = 1000 } = {}) {
     ]
   });
 
-  wrap.appendChild(chart);
-  wrap.appendChild(tooltip);
+  const overlay = document.createElement("div");
+  overlay.className = "election-waffle-overlay";
+  overlay.style.position = "absolute";
+  overlay.style.inset = "0";
+  overlay.style.display = "grid";
+  overlay.style.gridTemplateColumns = `repeat(${rows.length}, minmax(0, 1fr))`;
+  overlay.style.pointerEvents = "none";
+  overlay.style.zIndex = "20";
 
-  requestAnimationFrame(() => {
-    const svg = chart.querySelector("svg");
-    if (!svg) return;
+  rows.forEach((d) => {
+    const zone = document.createElement("div");
+    zone.className = "election-waffle-overlay__zone";
+    zone.style.pointerEvents = "auto";
+    zone.style.cursor = "pointer";
+    zone.style.minWidth = "0";
 
-    const percentLabels = Array.from(svg.querySelectorAll("text"))
-      .filter((node) => /%$/.test((node.textContent || "").trim()))
-      .slice(0, rows.length);
+    zone.addEventListener("mousemove", (event) => {
+      tooltip.innerHTML = `
+        <div><strong>${d.displayName}</strong></div>
+        <div>Votes: ${format(d.votes)}</div>
+        <div>Party: ${d.party ?? "—"}</div>
+        <div>Electoral status: ${d.status ?? "—"}</div>
+      `;
 
-    if (!percentLabels.length) return;
+      const wrapRect = wrap.getBoundingClientRect();
+      const tooltipWidth = tooltip.offsetWidth || 180;
+      const tooltipHeight = tooltip.offsetHeight || 72;
 
-    const svgNS = "http://www.w3.org/2000/svg";
-    const overlayGroup = document.createElementNS(svgNS, "g");
-    overlayGroup.setAttribute("class", "waffle-hover-zones");
+      let left = event.clientX - wrapRect.left + 12;
+      let top = event.clientY - wrapRect.top - 12;
 
-    const centers = percentLabels.map((node) => {
-      const box = node.getBBox();
-      return box.x + box.width / 2;
+      if (left + tooltipWidth > wrapRect.width - 8) {
+        left = wrapRect.width - tooltipWidth - 8;
+      }
+
+      if (top + tooltipHeight > wrapRect.height - 8) {
+        top = wrapRect.height - tooltipHeight - 8;
+      }
+
+      if (top < 8) top = 8;
+      if (left < 8) left = 8;
+
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+      tooltip.style.opacity = "1";
     });
 
-    const boundaries = [];
-    boundaries[0] = 0;
-
-    for (let i = 1; i < centers.length; i++) {
-      boundaries[i] = (centers[i - 1] + centers[i]) / 2;
-    }
-
-    const viewBox = svg.viewBox.baseVal;
-    const svgWidth = viewBox && viewBox.width ? viewBox.width : width;
-    const svgHeight = viewBox && viewBox.height ? viewBox.height : 300;
-
-    boundaries[centers.length] = svgWidth;
-
-    rows.forEach((d, i) => {
-      const rect = document.createElementNS(svgNS, "rect");
-      rect.setAttribute("x", String(boundaries[i]));
-      rect.setAttribute("y", "0");
-      rect.setAttribute("width", String(boundaries[i + 1] - boundaries[i]));
-      rect.setAttribute("height", String(svgHeight));
-      rect.setAttribute("fill", "transparent");
-      rect.style.pointerEvents = "all";
-      rect.style.cursor = "pointer";
-
-      rect.addEventListener("mousemove", (event) => {
-        tooltip.innerHTML = `
-          <div><strong>${d.displayName}</strong></div>
-          <div>Votes: ${format(d.votes)}</div>
-          <div>Party: ${d.party ?? "—"}</div>
-          <div>Electoral status: ${d.status ?? "—"}</div>
-        `;
-
-        const wrapRect = wrap.getBoundingClientRect();
-        tooltip.style.left = `${event.clientX - wrapRect.left + 12}px`;
-        tooltip.style.top = `${event.clientY - wrapRect.top - 12}px`;
-        tooltip.style.opacity = "1";
-      });
-
-      rect.addEventListener("mouseleave", () => {
-        tooltip.style.opacity = "0";
-      });
-
-      overlayGroup.appendChild(rect);
+    zone.addEventListener("mouseleave", () => {
+      tooltip.style.opacity = "0";
     });
 
-    svg.appendChild(overlayGroup);
+    overlay.appendChild(zone);
   });
+
+  wrap.addEventListener("mouseleave", () => {
+    tooltip.style.opacity = "0";
+  });
+
+  wrap.appendChild(chart);
+  wrap.appendChild(overlay);
+  wrap.appendChild(tooltip);
 
   return wrap;
 }
