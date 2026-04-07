@@ -1696,10 +1696,13 @@ display(
       return;
     }
 
-    const rows = await getFinalRows();
+    const rows = await getResults();
+    const { constituency } = getState();
     if (!isCurrent()) return;
 
-    const cleanedRows = rows.map((d) => ({
+    const filteredRows = rows.filter((d) => d.constituency === constituency);
+
+    const cleanedRows = filteredRows.map((d) => ({
       constituency: d.constituency ?? "",
       candidate: getDisplayNameFromElection(d.name) ?? "",
       party: d.party ?? "",
@@ -1727,8 +1730,8 @@ display(
     const link = document.createElement("a");
     link.className = "pq-download";
     link.href = url;
-    link.download = "dail_election_results_2024.csv";
-    link.textContent = "Download 2024 general election dataset";
+    link.download = `${constituency.toLowerCase().replace(/\s+/g, "-")}-election-results-2024.csv`;
+    link.textContent = `Download full count-by-count dataset for ${constituency}`;
 
     el.replaceChildren(link);
   })
