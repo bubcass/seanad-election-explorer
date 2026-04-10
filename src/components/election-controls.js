@@ -17,6 +17,7 @@ export function electionControls({
   const constituencyId = `${uid}-constituency`;
   const countId = `${uid}-count`;
   const countOutputId = `${uid}-count-output`;
+  const countJumpId = `${uid}-count-jump`;
   const partyId = `${uid}-party`;
   const candidateId = `${uid}-candidate`;
 
@@ -38,8 +39,9 @@ export function electionControls({
 
   function getRowsForConstituency(constituency) {
     if (!Array.isArray(rowsCache)) return [];
-    if (!constituency || constituency === "All constituencies")
+    if (!constituency || constituency === "All constituencies") {
       return rowsCache;
+    }
     return rowsCache.filter((d) => d.constituency === constituency);
   }
 
@@ -99,6 +101,29 @@ export function electionControls({
     }
   }
 
+  function updateCountUI(currentCount, maxCount) {
+    const countOutput = container.querySelector(
+      `#${CSS.escape(countOutputId)}`,
+    );
+    const countInput = container.querySelector(`#${CSS.escape(countId)}`);
+    const countJump = container.querySelector(`#${CSS.escape(countJumpId)}`);
+
+    if (countOutput) {
+      countOutput.textContent =
+        maxCount == null
+          ? "No counts available"
+          : `Count ${currentCount} of ${maxCount}`;
+    }
+
+    if (countInput && String(countInput.value) !== String(currentCount)) {
+      countInput.value = String(currentCount);
+    }
+
+    if (countJump && String(countJump.value) !== String(currentCount)) {
+      countJump.value = String(currentCount);
+    }
+  }
+
   function render() {
     ensureValidState();
 
@@ -154,6 +179,21 @@ export function electionControls({
           <div id="${countOutputId}" class="count-output">
             ${countDisabled ? "No counts available" : `Count ${currentCount} of ${maxCount}`}
           </div>
+          <select
+            id="${countJumpId}"
+            name="count-jump"
+            class="control-input control-input--count-select"
+            ${countDisabled ? "disabled" : ""}
+          >
+            ${availableCounts
+              .map(
+                (value) =>
+                  `<option value="${value}" ${
+                    currentCount === value ? "selected" : ""
+                  }>Count ${value}</option>`,
+              )
+              .join("")}
+          </select>
         </div>
       </div>
 
@@ -195,9 +235,7 @@ export function electionControls({
       `#${CSS.escape(constituencyId)}`,
     );
     const countInput = container.querySelector(`#${CSS.escape(countId)}`);
-    const countOutput = container.querySelector(
-      `#${CSS.escape(countOutputId)}`,
-    );
+    const countJump = container.querySelector(`#${CSS.escape(countJumpId)}`);
     const partySelect = container.querySelector(`#${CSS.escape(partyId)}`);
     const candidateSelect = container.querySelector(
       `#${CSS.escape(candidateId)}`,
@@ -222,9 +260,13 @@ export function electionControls({
 
     countInput?.addEventListener("input", () => {
       state.count = Number(countInput.value);
-      if (countOutput) {
-        countOutput.textContent = `Count ${state.count} of ${maxCount}`;
-      }
+      updateCountUI(state.count, maxCount);
+      onChange(state);
+    });
+
+    countJump?.addEventListener("change", () => {
+      state.count = Number(countJump.value);
+      updateCountUI(state.count, maxCount);
       onChange(state);
     });
 

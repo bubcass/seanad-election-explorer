@@ -1,4 +1,3 @@
-@import url("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap");
 
 :root {
@@ -62,13 +61,13 @@ main,
 .observablehq--block:has(> .chart-caption),
 .observablehq--block:has(> .download-block),
 .observablehq--block:has(> .controls-block),
-.observablehq--block:has(> .constituency-top-panel),
+.observablehq--block:has(> .panel-top-panel),
 .observablehq--block:has(.hero),
 .observablehq--block:has(.reactive-prose),
 .observablehq--block:has(.chart-caption),
 .observablehq--block:has(.download-block),
 .observablehq--block:has(.controls-block),
-.observablehq--block:has(.constituency-top-panel) {
+.observablehq--block:has(.panel-top-panel) {
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -90,12 +89,12 @@ main,
     background: #000;
 }
 
-.hero__video {
+.hero__image {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0.78;
+    object-position: center;
 }
 
 .hero__overlay {
@@ -106,9 +105,9 @@ main,
     align-items: flex-end;
     background: linear-gradient(
         to top,
-        rgba(0, 0, 0, 0.72),
-        rgba(0, 0, 0, 0.4),
-        rgba(0, 0, 0, 0.05)
+        rgba(0, 0, 0, 0.76),
+        rgba(0, 0, 0, 0.44),
+        rgba(0, 0, 0, 0.08)
     );
     pointer-events: none;
 }
@@ -441,13 +440,6 @@ a:focus-visible {
     width: 72%;
 }
 
-.map-skeleton {
-    min-height: 360px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: #ebe6da;
-}
-
 .cards-skeleton {
     max-width: var(--text-max);
     margin: 0 auto;
@@ -455,7 +447,7 @@ a:focus-visible {
 
 .cards-skeleton__inner--winners {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0.9rem;
 }
 
@@ -605,94 +597,121 @@ a:focus-visible {
 
 .pq-controls--timeline {
     grid-template-columns: minmax(0, 1fr);
-    max-width: var(--text-max);
+    max-width: none;
+    width: 100%;
 }
 
 .pq-controls--single {
-    grid-template-columns: minmax(260px, 420px);
+    grid-template-columns: minmax(0, 1fr);
     max-width: var(--text-max);
 }
 
-/* Slider wrapper chain */
+/* Shared select styling */
 
-.pq-controls.pq-controls--timeline,
-.pq-controls.pq-controls--timeline .control--count,
-.pq-controls.pq-controls--timeline .count-slider-wrap,
-.pq-controls.pq-controls--timeline .control-input--range {
+.election-panel-select,
+.election-constituency-select,
+.election-candidate-select,
+.control--panel,
+.control--count-select {
     width: 100%;
+    max-width: 100%;
+}
+
+.election-candidate-select {
     max-width: none;
 }
 
-.control--count {
-    width: 100%;
+.election-panel-select .control,
+.election-constituency-select .control,
+.election-candidate-select .control,
+.control--panel,
+.control--count-select {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
     min-width: 0;
+    margin: 0;
 }
 
-.count-slider-wrap {
-    width: 100%;
-    display: grid;
-    gap: 0.85rem;
-    margin-top: 0;
-}
-
-.control-input--range {
-    width: 100%;
+.election-panel-select .control-label,
+.election-constituency-select .control-label,
+.election-candidate-select .control-label,
+.control--panel .control-label,
+.control--count-select .control-label {
     display: block;
     margin: 0;
-    padding: 0;
-    border: 0;
-    background: transparent;
+    font-size: 0.92rem;
+    color: var(--gold);
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+}
+
+.election-panel-select .control-input,
+.election-constituency-select .control-input,
+.election-candidate-select .control-input,
+.control--panel .control-input,
+.control--count-select .control-input,
+.control-input--count-dropdown {
     appearance: none;
-    cursor: pointer;
+    -webkit-appearance: none;
+    border-radius: 0;
+    border: 1.5px solid var(--button-border);
+    padding: 0.75rem 2.4rem 0.75rem 0.75rem;
+    min-height: 54px;
+    width: 100%;
+    background-color: #fffdf8;
+    color: var(--text);
+    font: inherit;
+    line-height: 1.2;
+    box-sizing: border-box;
+    transition:
+        border-color 0.25s ease,
+        background-color 0.25s ease,
+        color 0.25s ease,
+        box-shadow 0.25s ease;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--accent) 50%),
+        linear-gradient(135deg, var(--accent) 50%, transparent 50%);
+    background-position:
+        calc(100% - 18px) calc(50% - 3px),
+        calc(100% - 12px) calc(50% - 3px);
+    background-size:
+        6px 6px,
+        6px 6px;
+    background-repeat: no-repeat;
 }
 
-.control-input--range::-webkit-slider-runnable-track {
-    height: 10px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, var(--accent) 0%, #8f8878 100%);
+.election-panel-select .control-input:hover,
+.election-constituency-select .control-input:hover,
+.election-candidate-select .control-input:hover,
+.control--panel .control-input:hover,
+.control--count-select .control-input:hover,
+.control-input--count-dropdown:hover {
+    border-color: var(--accent);
+    background-color: #fff;
 }
 
-.control-input--range::-webkit-slider-thumb {
-    appearance: none;
-    width: 26px;
-    height: 26px;
-    border-radius: 999px;
-    background: #f8f6ef;
-    border: 3px solid var(--accent);
-    margin-top: -8px;
-    box-shadow: 0 1px 6px rgba(47, 47, 47, 0.18);
+.election-panel-select .control-input:focus,
+.election-constituency-select .control-input:focus,
+.election-candidate-select .control-input:focus,
+.control--panel .control-input:focus,
+.control--count-select .control-input:focus,
+.control-input--count-dropdown:focus {
+    outline: 2px solid transparent;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(107, 89, 34, 0.18);
+    background-color: #fff;
 }
 
-.control-input--range::-moz-range-track {
-    height: 10px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, var(--accent) 0%, #8f8878 100%);
+.panel-top__info .pq-controls--single,
+.panel-top__info .control--panel,
+.panel-top__info .election-panel-select {
+    width: 100%;
+    max-width: 100%;
 }
 
-.control-input--range::-moz-range-thumb {
-    width: 26px;
-    height: 26px;
-    border: 3px solid var(--accent);
-    border-radius: 999px;
-    background: #f8f6ef;
-    box-shadow: 0 1px 6px rgba(47, 47, 47, 0.18);
-}
-
-.control-input--range:hover::-webkit-slider-thumb,
-.control-input--range:focus-visible::-webkit-slider-thumb {
-    box-shadow: 0 0 0 4px rgba(74, 70, 61, 0.14);
-}
-
-.control-input--range:hover::-moz-range-thumb,
-.control-input--range:focus-visible::-moz-range-thumb {
-    box-shadow: 0 0 0 4px rgba(74, 70, 61, 0.14);
-}
-
-.control-input--range:focus-visible {
-    outline: none;
-}
-
-/* Section control layout */
+/* Timeline control */
 
 .section-driver-block,
 .section-local-control {
@@ -700,6 +719,15 @@ a:focus-visible {
     display: grid;
     grid-template-columns: minmax(220px, 0.9fr) minmax(320px, 1.1fr);
     gap: 0.6rem 1.5rem;
+    align-items: start;
+    margin: 0.15rem auto 0.6rem;
+}
+
+.section-driver-block--timeline {
+    max-width: var(--text-max);
+    display: grid;
+    grid-template-columns: minmax(220px, 320px) minmax(280px, 1fr);
+    gap: 0.85rem 1.5rem;
     align-items: start;
     margin: 0.15rem auto 0.6rem;
 }
@@ -741,7 +769,24 @@ a:focus-visible {
     width: 100%;
     margin: 0;
     padding-top: 0;
+    max-width: none;
 }
+
+.section-driver-block--timeline .section-driver-block__control,
+.section-driver-block--timeline .section-driver-block__intro,
+.section-driver-block--timeline .pq-controls--timeline,
+.section-driver-block--timeline .control--count-select {
+    width: 100%;
+    max-width: none;
+    align-self: start;
+}
+
+.control--count-select {
+    width: 100%;
+    max-width: 320px;
+}
+
+/* Segmented controls */
 
 .segmented-control-wrap {
     min-width: 0;
@@ -800,83 +845,6 @@ a:focus-visible {
 .segmented-control__option:has(input:focus-visible) {
     outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
-}
-
-/* Shared select styling */
-
-.election-constituency-select,
-.election-candidate-select {
-    width: 100%;
-    max-width: 320px;
-}
-
-.election-candidate-select {
-    max-width: none;
-}
-
-.election-constituency-select .control,
-.election-candidate-select .control {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    min-width: 0;
-    margin: 0;
-}
-
-.election-constituency-select .control-label,
-.election-candidate-select .control-label {
-    display: block;
-    margin: 0;
-    font-size: 0.92rem;
-    color: var(--gold);
-    font-weight: 600;
-    line-height: 1.35;
-    letter-spacing: 0.01em;
-}
-
-.election-constituency-select .control-input,
-.election-candidate-select .control-input {
-    appearance: none;
-    -webkit-appearance: none;
-    border-radius: 0;
-    border: 1.5px solid var(--button-border);
-    padding: 0.75rem 2.4rem 0.75rem 0.75rem;
-    min-height: 54px;
-    width: 100%;
-    background-color: #fffdf8;
-    color: var(--text);
-    font: inherit;
-    line-height: 1.2;
-    box-sizing: border-box;
-    transition:
-        border-color 0.25s ease,
-        background-color 0.25s ease,
-        color 0.25s ease,
-        box-shadow 0.25s ease;
-    background-image:
-        linear-gradient(45deg, transparent 50%, var(--accent) 50%),
-        linear-gradient(135deg, var(--accent) 50%, transparent 50%);
-    background-position:
-        calc(100% - 18px) calc(50% - 3px),
-        calc(100% - 12px) calc(50% - 3px);
-    background-size:
-        6px 6px,
-        6px 6px;
-    background-repeat: no-repeat;
-}
-
-.election-constituency-select .control-input:hover,
-.election-candidate-select .control-input:hover {
-    border-color: var(--accent);
-    background-color: #fff;
-}
-
-.election-constituency-select .control-input:focus,
-.election-candidate-select .control-input:focus {
-    outline: 2px solid transparent;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(107, 89, 34, 0.18);
-    background-color: #fff;
 }
 
 /* Download */
@@ -969,80 +937,42 @@ a:focus-visible {
     width: 30%;
 }
 
-/* Map */
+/* Seanad Explorer top section */
 
-.constituency-map {
-    width: 100%;
-    min-height: 360px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-    background: #ebe6da;
-    box-shadow: var(--shadow-soft);
-}
-
-.constituency-map .leaflet-container {
-    width: 100%;
-    height: 100%;
-    font-family: inherit;
-    background: #ebe6da;
-}
-
-.constituency-map .leaflet-control-attribution,
-.constituency-map .leaflet-popup-content-wrapper,
-.constituency-map .leaflet-popup-tip {
-    font-family: inherit;
-}
-
-.constituency-map .leaflet-popup-content {
-    color: var(--text);
-    line-height: 1.45;
-}
-
-.constituency-map .leaflet-popup-content strong {
-    color: var(--accent);
-}
-
-/* Elections Explorer top section */
-
-.constituency-top {
+.panel-top {
     max-width: var(--text-max);
     margin: 1rem auto 2rem;
     display: grid;
     gap: 1rem;
 }
 
-.constituency-top__row {
+.panel-top__row {
     display: grid;
-    grid-template-columns: minmax(280px, 0.9fr) minmax(340px, 1.1fr);
-    gap: 1.5rem;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
     align-items: start;
 }
 
-.constituency-top__info,
-.constituency-top__map {
+.panel-top__info,
+.panel-top__cards {
     min-width: 0;
 }
 
-.constituency-top__info {
+.panel-top__info {
     display: grid;
-    gap: 1rem;
+    gap: 0.85rem;
     align-content: start;
 }
 
-.constituency-top__summary h2 {
+.panel-top__summary h2 {
     margin-top: 0;
 }
 
-.constituency-top__summary p {
+.panel-top__summary p {
     max-width: none;
 }
 
-.constituency-top__map .constituency-map {
-    min-height: 360px;
-}
-
-.constituency-top__cards {
+.panel-top__cards {
     width: 100%;
 }
 
@@ -1050,6 +980,7 @@ a:focus-visible {
 
 .elected-strip {
     display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0.9rem;
     align-items: stretch;
 }
@@ -1063,7 +994,7 @@ a:focus-visible {
 }
 
 .elected-strip[data-count="5"] {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .elected-strip__card-link {
@@ -1185,8 +1116,15 @@ a:focus-visible {
 /* Responsive */
 
 @media (max-width: 980px) {
-    .constituency-top__row {
+    .panel-top__row {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .elected-strip,
+    .cards-skeleton__inner--winners {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
@@ -1220,17 +1158,26 @@ a:focus-visible {
     .pq-controls--timeline,
     .pq-controls--single,
     .section-driver-block,
-    .section-local-control {
+    .section-local-control,
+    .section-driver-block--timeline {
         grid-template-columns: 1fr;
         gap: 0.85rem 1rem;
+    }
+
+    .section-driver-block--timeline {
+        max-width: var(--text-max);
     }
 
     .controls-block select,
     .controls-block input[type="search"],
     .controls-block input[type="text"],
     .download-block .pq-download,
+    .election-panel-select .control-input,
     .election-constituency-select .control-input,
     .election-candidate-select .control-input,
+    .control--panel .control-input,
+    .control--count-select .control-input,
+    .control-input--count-dropdown,
     .segmented-control__option {
         min-height: 48px;
     }
@@ -1241,15 +1188,13 @@ a:focus-visible {
         font-size: 0.94rem;
     }
 
-    .constituency-map,
-    .constituency-top__map .constituency-map,
-    .map-skeleton {
-        min-height: 320px;
+    .control--count-select {
+        max-width: 100%;
     }
 
     .elected-strip,
     .cards-skeleton__inner--winners {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
@@ -1262,12 +1207,6 @@ a:focus-visible {
 
     .elected-strip,
     .cards-skeleton__inner--winners {
-        grid-template-columns: 1fr !important;
-    }
-
-    .constituency-map,
-    .constituency-top__map .constituency-map,
-    .map-skeleton {
-        min-height: 300px;
+        grid-template-columns: 1fr;
     }
 }

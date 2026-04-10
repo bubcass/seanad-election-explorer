@@ -1,0 +1,734 @@
+[
+  {
+    "House": "27th Seanad",
+    "Senator": "Garret Ahearn",
+    "Party": "Fine Gael",
+    "Constituency": "Administrative Panel",
+    "Code": "Garret-Ahearn.S.2020-03-30",
+    "Committees": [
+      "Committee on Parliamentary Privileges and Oversight (Seanad Éireann)",
+      "Committee of Selection (Seanad Éireann)",
+      "Seanad Select Committee on EU Scrutiny and Transparency",
+      "Seanad Public Consultation Committee",
+      "Joint Committee on Arts, Media, Communications, Culture and Sport",
+      "Joint Committee on Foreign Affairs and Trade (Leas-Chathaoirleach)"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Chris Andrews",
+    "Party": "Sinn Féin",
+    "Constituency": "Labour Panel",
+    "Code": "Chris-Andrews.D.2007-06-14",
+    "Committees": [
+      "Seanad Select Committee on Subsidiarity (European Union Legislative Scrutiny)",
+      "Committee on Members' Interests of Seanad Éireann",
+      "Joint Committee on European Union Affairs",
+      "Joint Committee on Public Petitions and the Ombudsmen"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Frances Black",
+    "Party": "Independent",
+    "Constituency": "Industrial and Commercial Panel",
+    "Code": "Frances-Black.S.2016-04-25",
+    "Committees": [
+      "Seanad Public Consultation Committee",
+      "Joint Committee on the Implementation of the Good Friday Agreement "
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Niall Blaney",
+    "Party": "Fianna Fáil",
+    "Constituency": "Agricultural Panel",
+    "Code": "Niall-Blaney.D.2002-06-06",
+    "Committees": [
+      "Joint Committee on the Implementation of the Good Friday Agreement ",
+      "Joint Committee on Fisheries and Maritime Affairs"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Victor Boyhan",
+    "Party": "Independent",
+    "Constituency": "Agricultural Panel",
+    "Code": "Victor-Boyhan.S.2016-04-25",
+    "Committees": [
+      "Seanad Select Committee on EU Scrutiny and Transparency",
+      "Committee of Selection (Seanad Éireann)",
+      "Joint Committee on Fisheries and Maritime Affairs",
+      "Joint Committee on Agriculture and Food"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Manus Boyle",
+    "Party": "Fine Gael",
+    "Constituency": "Nominated by the Taoiseach",
+    "Code": "Manus-Boyle.S.2025-01-29",
+    "Committees": [
+      "Joint Committee on Fisheries and Maritime Affairs",
+      "Joint Committee on Health"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Nikki Bradley",
+    "Party": "Fine Gael",
+    "Constituency": "Nominated by the Taoiseach",
+    "Code": "Nikki-Bradley.S.2024-07-10",
+    "Committees": [
+      "Joint Committee on Children and Equality",
+      "Joint Committee on Disability Matters"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Paraic Brady",
+    "Party": "Fine Gael",
+    "Constituency": "Agricultural Panel",
+    "Code": "Paraic-Brady.S.2025-01-29",
+    "Committees": [
+      "Joint Committee on Public Petitions and the Ombudsmen",
+      "Joint Committee on Agriculture and Food"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Cathal Byrne",
+    "Party": "Fine Gael",
+    "Constituency": "Cultural and Educational Panel",
+    "Code": "Cathal-Byrne.S.2025-01-29",
+    "Committees": [
+      "Seanad Public Consultation Committee",
+      "Joint Committee on Finance, Public Expenditure, Public Service Reform and Digitalisation, and Taoiseach",
+      "Joint Committee on Infrastructure and National Development Plan Delivery"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Maria Byrne",
+    "Party": "Fine Gael",
+    "Constituency": "Agricultural Panel",
+    "Code": "Maria-Byrne.S.2016-04-25",
+    "Committees": [
+      "Committee on Parliamentary Privileges and Oversight (Seanad Éireann) (Leas-Chathaoirleach)",
+      "Committee of Selection (Seanad Éireann) (Cathaoirleach)",
+      "Seanad Public Consultation Committee (Cathaoirleach)",
+      "Joint Committee on Disability Matters",
+      "Working Group of Committee Cathaoirligh",
+      "Joint Committee on Key Issues Affecting the Traveller Community",
+      "Joint Committee on Health"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Pat Casey",
+    "Party": "Fianna Fáil",
+    "Constituency": "Labour Panel",
+    "Code": "Pat-Casey.D.2016-10-03",
+    "Committees": [
+      "Seanad Select Committee on Subsidiarity (European Union Legislative Scrutiny) (Cathaoirleach)",
+      "Seanad Select Committee on EU Scrutiny and Transparency",
+      "Seanad Public Consultation Committee",
+      "Committee on Parliamentary Privileges and Oversight (Seanad Éireann)",
+      "Committee of Selection (Seanad Éireann)",
+      "Working Group of Committee Cathaoirligh",
+      "Joint Committee on Finance, Public Expenditure, Public Service Reform and Digitalisation, and Taoiseach",
+      "Joint Committee on Housing, Local Government and Heritage"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Lorraine Clifford-Lee",
+    "Party": "Fianna Fáil",
+    "Constituency": "Nominated by the Taoiseach",
+    "Code": "Lorraine-Clifford-Lee.S.2016-04-25",
+    "Committees": [
+      "Seanad Select Committee on Subsidiarity (European Union Legislative Scrutiny)",
+      "Committee on Members' Interests of Seanad Éireann (Cathaoirleach)",
+      "Working Group of Committee Cathaoirligh",
+      "Joint Committee on Climate, Environment and Energy (Leas-Chathaoirleach)",
+      "Joint Committee on Transport"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Tom Clonan",
+    "Party": "Independent",
+    "Constituency": "University of Dublin",
+    "Code": "Tom-Clonan.S.2022-04-04",
+    "Committees": [
+      "Joint Committee on Defence and National Security",
+      "Joint Committee on Disability Matters",
+      "Joint Committee on Health"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Joanne Collins",
+    "Party": "Sinn Féin",
+    "Constituency": "Agricultural Panel",
+    "Code": "Joanne-Collins.S.2025-01-29",
+    "Committees": [
+      "Joint Committee on Agriculture and Food",
+      "Joint Committee on Transport"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Alison Comyn",
+    "Party": "Fianna Fáil",
+    "Constituency": "Nominated by the Taoiseach",
+    "Code": "Alison-Comyn.S.2025-01-29",
+    "Committees": [
+      "Joint Committee on Arts, Media, Communications, Culture and Sport",
+      "Joint Committee on the Implementation of the Good Friday Agreement "
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Joe Conway",
+    "Party": "Independent",
+    "Constituency": "Cultural and Educational Panel",
+    "Code": "Joe-Conway.S.2025-01-29",
+    "Committees": [
+      "Comhchoiste na Gaeilge, na Gaeltachta agus Phobal Labhartha na Gaeilge",
+      "Joint Committee on Education and Youth"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Martin Conway",
+    "Party": "Independent",
+    "Constituency": "Administrative Panel",
+    "Code": "Martin-Conway.S.2011-05-25",
+    "Committees": []
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Nessa Cosgrove",
+    "Party": "Labour Party",
+    "Constituency": "Labour Panel",
+    "Code": "Nessa-Cosgrove.S.2025-01-29",
+    "Committees": [
+      "Joint Committee on Children and Equality",
+      "Joint Committee on Transport"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Teresa Costello",
+    "Party": "Fianna Fáil",
+    "Constituency": "Agricultural Panel",
+    "Code": "Teresa-Costello.S.2025-01-29",
+    "Committees": ["Joint Committee on Health", "Joint Committee on Drugs Use"]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Gerard Craughwell",
+    "Party": "Independent",
+    "Constituency": "Labour Panel",
+    "Code": "Gerard-P-Craughwell.S.2014-10-10",
+    "Committees": [
+      "Seanad Public Consultation Committee",
+      "Seanad Select Committee on Subsidiarity (European Union Legislative Scrutiny)",
+      "Joint Committee on Fisheries and Maritime Affairs",
+      "Joint Committee on Defence and National Security"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Ollie Crowe",
+    "Party": "Fianna Fáil",
+    "Constituency": "Industrial and Commercial Panel",
+    "Code": "Ollie-Crowe.S.2020-03-30",
+    "Committees": [
+      "Joint Committee on Enterprise, Tourism and Employment",
+      "Joint Committee on Infrastructure and National Development Plan Delivery"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Shane Curley",
+    "Party": "Fianna Fáil",
+    "Constituency": "Cultural and Educational Panel",
+    "Code": "Shane-Curley.S.2025-01-29",
+    "Committees": [
+      "Joint Committee on Education and Youth",
+      "Comhchoiste na Gaeilge, na Gaeltachta agus Phobal Labhartha na Gaeilge"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Mark Daly",
+    "Party": "Fianna Fáil",
+    "Constituency": "Administrative Panel",
+    "Code": "Mark-Daly.S.2007-07-23",
+    "Committees": [
+      "Seanad Select Committee on EU Scrutiny and Transparency (Cathaoirleach)",
+      "Committee on Parliamentary Privileges and Oversight (Seanad Éireann) (Cathaoirleach)",
+      "Working Group of Committee Cathaoirligh"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Paul Daly",
+    "Party": "Fianna Fáil",
+    "Constituency": "Agricultural Panel",
+    "Code": "Paul-Daly.S.2016-04-25",
+    "Committees": [
+      "Seanad Select Committee on Subsidiarity (European Union Legislative Scrutiny)",
+      "Committee on Members' Interests of Seanad Éireann",
+      "Committee on Parliamentary Privileges and Oversight (Seanad Éireann)",
+      "Committee of Selection (Seanad Éireann)",
+      "Joint Committee on Agriculture and Food",
+      "Joint Committee on Further and Higher Education, Research, Innovation and Science"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Aidan Davitt",
+    "Party": "Fianna Fáil",
+    "Constituency": "Industrial and Commercial Panel",
+    "Code": "Aidan-Davitt.S.2016-04-25",
+    "Committees": [
+      "Joint Committee on Infrastructure and National Development Plan Delivery",
+      "Joint Committee on European Union Affairs (Leas-Chathaoirleach)"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Mark Duffy",
+    "Party": "Fine Gael",
+    "Constituency": "Labour Panel",
+    "Code": "Mark-Duffy.S.2025-01-29",
+    "Committees": [
+      "Joint Committee on Climate, Environment and Energy",
+      "Joint Committee on Transport"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Mary Fitzpatrick",
+    "Party": "Fianna Fáil",
+    "Constituency": "Industrial and Commercial Panel",
+    "Code": "Mary-Fitzpatrick.S.2020-06-29",
+    "Committees": [
+      "Joint Committee on Drugs Use (Leas-Chathaoirleach)",
+      "Joint Committee on Enterprise, Tourism and Employment"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Joe Flaherty",
+    "Party": "Fianna Fáil",
+    "Constituency": "Nominated by the Taoiseach",
+    "Code": "Joe-Flaherty.D.2020-02-08",
+    "Committees": [
+      "Joint Committee on Public Petitions and the Ombudsmen",
+      "Joint Committee on Housing, Local Government and Heritage"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Eileen Flynn",
+    "Party": "Independent",
+    "Constituency": "Administrative Panel",
+    "Code": "Eileen-Flynn.S.2020-06-29",
+    "Committees": [
+      "Joint Committee on Key Issues Affecting the Traveller Community (Leas-Chathaoirleach)",
+      "Joint Committee on Infrastructure and National Development Plan Delivery"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Robbie Gallagher",
+    "Party": "Fianna Fáil",
+    "Constituency": "Labour Panel",
+    "Code": "Robbie-Gallagher.S.2016-04-25",
+    "Committees": [
+      "Joint Committee on Defence and National Security",
+      "Joint Committee on Justice, Home Affairs and Migration"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Imelda Goldsboro",
+    "Party": "Fianna Fáil",
+    "Constituency": "Nominated by the Taoiseach",
+    "Code": "Imelda-Goldsboro.S.2025-01-29",
+    "Committees": [
+      "Seanad Public Consultation Committee",
+      "Joint Committee on Transport",
+      "Joint Committee on Social Protection, Rural and Community Development"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Laura Harmon",
+    "Party": "Labour Party",
+    "Constituency": "Industrial and Commercial Panel",
+    "Code": "Laura-Harmon.S.2025-01-29",
+    "Committees": [
+      "Committee on Parliamentary Privileges and Oversight (Seanad Éireann)",
+      "Seanad Public Consultation Committee",
+      "Joint Committee on Disability Matters",
+      "Joint Committee on Further and Higher Education, Research, Innovation and Science",
+      "Joint Committee on Artificial Intelligence"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Alice-Mary Higgins",
+    "Party": "Independent",
+    "Constituency": "National University of Ireland",
+    "Code": "Alice-Mary-Higgins.S.2016-04-25",
+    "Committees": [
+      "Seanad Select Committee on EU Scrutiny and Transparency",
+      "Committee on Parliamentary Privileges and Oversight (Seanad Éireann)",
+      "Seanad Select Committee on Subsidiarity (European Union Legislative Scrutiny)",
+      "Joint Committee on Foreign Affairs and Trade",
+      "Joint Committee on Climate, Environment and Energy",
+      "Joint Committee on Finance, Public Expenditure, Public Service Reform and Digitalisation, and Taoiseach"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Garret Kelleher",
+    "Party": "Fine Gael",
+    "Constituency": "Industrial and Commercial Panel",
+    "Code": "Garret-Kelleher.S.2025-01-29",
+    "Committees": [
+      "Seanad Select Committee on EU Scrutiny and Transparency",
+      "Joint Committee on Justice, Home Affairs and Migration",
+      "Joint Committee on the Implementation of the Good Friday Agreement "
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Mike Kennelly",
+    "Party": "Fine Gael",
+    "Constituency": "Labour Panel",
+    "Code": "Mike-Kennelly.S.2025-01-29",
+    "Committees": [
+      "Joint Committee on Children and Equality",
+      "Joint Committee on Further and Higher Education, Research, Innovation and Science"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Sharon Keogan",
+    "Party": "Independent",
+    "Constituency": "Industrial and Commercial Panel",
+    "Code": "Sharon-Keogan.S.2020-03-30",
+    "Committees": [
+      "Seanad Public Consultation Committee",
+      "Joint Committee on Children and Equality"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Seán Kyne",
+    "Party": "Fine Gael",
+    "Constituency": "Cultural and Educational Panel",
+    "Code": "Seán-Kyne.D.2011-03-09",
+    "Committees": [
+      "Seanad Public Consultation Committee",
+      "Committee on Parliamentary Privileges and Oversight (Seanad Éireann)",
+      "Committee of Selection (Seanad Éireann)",
+      "Comhchoiste na Gaeilge, na Gaeltachta agus Phobal Labhartha na Gaeilge",
+      "Joint Committee on Defence and National Security"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Eileen Lynch",
+    "Party": "Fine Gael",
+    "Constituency": "Agricultural Panel",
+    "Code": "Eileen-Lynch.S.2025-01-29",
+    "Committees": [
+      "Seanad Select Committee on EU Scrutiny and Transparency",
+      "Seanad Select Committee on Subsidiarity (European Union Legislative Scrutiny)",
+      "Joint Committee on Agriculture and Food",
+      "Joint Committee on European Union Affairs"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Aubrey McCarthy",
+    "Party": "Independent",
+    "Constituency": "University of Dublin",
+    "Code": "Aubrey-McCarthy.S.2025-01-29",
+    "Committees": [
+      "Joint Committee on Public Petitions and the Ombudsmen",
+      "Joint Committee on Enterprise, Tourism and Employment",
+      "Joint Committee on Housing, Local Government and Heritage"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Maria McCormack",
+    "Party": "Sinn Féin",
+    "Constituency": "Labour Panel",
+    "Code": "Maria-McCormack.S.2025-01-29",
+    "Committees": [
+      "Committee on Parliamentary Privileges and Oversight (Seanad Éireann)",
+      "Committee of Selection (Seanad Éireann)",
+      "Joint Committee on Housing, Local Government and Heritage",
+      "Joint Committee on Social Protection, Rural and Community Development"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Michael McDowell",
+    "Party": "Independent",
+    "Constituency": "National University of Ireland",
+    "Code": "Michael-McDowell.D.1987-03-10",
+    "Committees": [
+      "Seanad Select Committee on EU Scrutiny and Transparency",
+      "Committee on Members' Interests of Seanad Éireann",
+      "Committee on Parliamentary Privileges and Oversight (Seanad Éireann)",
+      "Seanad Select Committee on Subsidiarity (European Union Legislative Scrutiny)",
+      "Joint Committee on Justice, Home Affairs and Migration"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Rónán Mullen",
+    "Party": "Independent",
+    "Constituency": "National University of Ireland",
+    "Code": "Rónán-Mullen.S.2007-07-23",
+    "Committees": [
+      "Joint Committee on the Implementation of the Good Friday Agreement ",
+      "Joint Committee on Arts, Media, Communications, Culture and Sport",
+      "Joint Committee on European Union Affairs"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Conor Murphy",
+    "Party": "Sinn Féin",
+    "Constituency": "Industrial and Commercial Panel",
+    "Code": "Conor-Murphy.S.2025-01-29",
+    "Committees": [
+      "Seanad Select Committee on EU Scrutiny and Transparency",
+      "Seanad Public Consultation Committee",
+      "Joint Committee on Enterprise, Tourism and Employment",
+      "Joint Committee on Finance, Public Expenditure, Public Service Reform and Digitalisation, and Taoiseach",
+      "Joint Committee on the Implementation of the Good Friday Agreement "
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "PJ Murphy",
+    "Party": "Fine Gael",
+    "Constituency": "Agricultural Panel",
+    "Code": "PJ-Murphy.S.2025-01-29",
+    "Committees": [
+      "Committee on Members' Interests of Seanad Éireann",
+      "Seanad Select Committee on Subsidiarity (European Union Legislative Scrutiny)",
+      "Joint Committee on Housing, Local Government and Heritage"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Margaret Murphy O'Mahony",
+    "Party": "Fianna Fáil",
+    "Constituency": "Labour Panel",
+    "Code": "Margaret-Murphy-O'Mahony.D.2016-10-03",
+    "Committees": [
+      "Joint Committee on Children and Equality",
+      "Joint Committee on Disability Matters (Leas-Chathaoirleach)"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Linda Nelson Murray",
+    "Party": "Fine Gael",
+    "Constituency": "Industrial and Commercial Panel",
+    "Code": "Linda-Nelson-Murray.S.2025-01-29",
+    "Committees": [
+      "Committee on Members' Interests of Seanad Éireann",
+      "Joint Committee on Education and Youth",
+      "Joint Committee on Enterprise, Tourism and Employment"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Malcolm Noonan",
+    "Party": "Green Party",
+    "Constituency": "Agricultural Panel",
+    "Code": "Malcolm-Noonan.D.2020-02-08",
+    "Committees": [
+      "Seanad Select Committee on Subsidiarity (European Union Legislative Scrutiny)",
+      "Seanad Select Committee on EU Scrutiny and Transparency",
+      "Joint Committee on Arts, Media, Communications, Culture and Sport",
+      "Joint Committee on Climate, Environment and Energy",
+      "Joint Committee on Key Issues Affecting the Traveller Community"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Evanne Ní Chuilinn",
+    "Party": "Fine Gael",
+    "Constituency": "Nominated by the Taoiseach",
+    "Code": "Evanne-Ní-Chuilinn.S.2025-01-29",
+    "Committees": [
+      "Comhchoiste na Gaeilge, na Gaeltachta agus Phobal Labhartha na Gaeilge",
+      "Joint Committee on Arts, Media, Communications, Culture and Sport (Leas-Chathaoirleach)",
+      "Joint Committee on Drugs Use"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Noel O'Donovan",
+    "Party": "Fine Gael",
+    "Constituency": "Nominated by the Taoiseach",
+    "Code": "Noel-O'Donovan.S.2025-01-29",
+    "Committees": [
+      "Joint Committee on Climate, Environment and Energy",
+      "Joint Committee on Social Protection, Rural and Community Development",
+      "Joint Committee on Artificial Intelligence"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Fiona O'Loughlin",
+    "Party": "Fianna Fáil",
+    "Constituency": "Administrative Panel",
+    "Code": "Fiona-O'Loughlin.D.2016-10-03",
+    "Committees": [
+      "Seanad Public Consultation Committee",
+      "Committee of Selection (Seanad Éireann)",
+      "Seanad Select Committee on Subsidiarity (European Union Legislative Scrutiny)",
+      "Committee on Parliamentary Privileges and Oversight (Seanad Éireann)",
+      "Joint Committee on European Union Affairs",
+      "Joint Committee on Foreign Affairs and Trade"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Joe O'Reilly",
+    "Party": "Fine Gael",
+    "Constituency": "Labour Panel",
+    "Code": "Joe-O'Reilly.S.1989-10-01",
+    "Committees": [
+      "Committee on Parliamentary Privileges and Oversight (Seanad Éireann)",
+      "Committee of Selection (Seanad Éireann)",
+      "Seanad Select Committee on Subsidiarity (European Union Legislative Scrutiny)",
+      "Joint Committee on Foreign Affairs and Trade",
+      "Joint Committee on Key Issues Affecting the Traveller Community",
+      "Joint Committee on Finance, Public Expenditure, Public Service Reform and Digitalisation, and Taoiseach"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Sarah O'Reilly",
+    "Party": "Aontú",
+    "Constituency": "Agricultural Panel",
+    "Code": "Sarah-O'Reilly.S.2025-01-29",
+    "Committees": [
+      "Joint Committee on Fisheries and Maritime Affairs",
+      "Joint Committee on Social Protection, Rural and Community Development"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Anne Rabbitte",
+    "Party": "Fianna Fáil",
+    "Constituency": "Nominated by the Taoiseach",
+    "Code": "Anne-Rabbitte.D.2016-10-03",
+    "Committees": [
+      "Seanad Select Committee on EU Scrutiny and Transparency",
+      "Joint Committee on Justice, Home Affairs and Migration",
+      "Joint Committee on Social Protection, Rural and Community Development (Leas-Chathaoirleach)",
+      "Joint Committee on Key Issues Affecting the Traveller Community"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Lynn Ruane",
+    "Party": "Independent",
+    "Constituency": "University of Dublin",
+    "Code": "Lynn-Ruane.S.2016-04-25",
+    "Committees": [
+      "Committee on Members' Interests of Seanad Éireann",
+      "Committee of Selection (Seanad Éireann)",
+      "Joint Committee on Justice, Home Affairs and Migration",
+      "Joint Committee on Drugs Use",
+      "Joint Committee on Artificial Intelligence"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Dee Ryan",
+    "Party": "Fianna Fáil",
+    "Constituency": "Nominated by the Taoiseach",
+    "Code": "Dee-Ryan.S.2025-01-29",
+    "Committees": [
+      "Joint Committee on Further and Higher Education, Research, Innovation and Science",
+      "Joint Committee on Artificial Intelligence"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Nicole Ryan",
+    "Party": "Sinn Féin",
+    "Constituency": "Administrative Panel",
+    "Code": "Nicole-Ryan.S.2025-01-29",
+    "Committees": [
+      "Comhchoiste na Gaeilge, na Gaeltachta agus Phobal Labhartha na Gaeilge",
+      "Joint Committee on Health",
+      "Joint Committee on Drugs Use"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Gareth Scahill",
+    "Party": "Fine Gael",
+    "Constituency": "Nominated by the Taoiseach",
+    "Code": "Gareth-Scahill.S.2025-01-29",
+    "Committees": [
+      "Joint Committee on Education and Youth (Leas-Chathaoirleach)",
+      "Joint Committee on Artificial Intelligence"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Patricia Stephenson",
+    "Party": "Social Democrats",
+    "Constituency": "Labour Panel",
+    "Code": "Patricia-Stephenson.S.2025-01-29",
+    "Committees": [
+      "Committee of Selection (Seanad Éireann)",
+      "Joint Committee on the Implementation of the Good Friday Agreement ",
+      "Joint Committee on Infrastructure and National Development Plan Delivery",
+      "Joint Committee on Foreign Affairs and Trade"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Pauline Tully",
+    "Party": "Sinn Féin",
+    "Constituency": "Cultural and Educational Panel",
+    "Code": "Pauline-Tully.D.2020-02-08",
+    "Committees": [
+      "Joint Committee on Education and Youth",
+      "Joint Committee on Further and Higher Education, Research, Innovation and Science"
+    ]
+  },
+  {
+    "House": "27th Seanad",
+    "Senator": "Diarmuid Wilson",
+    "Party": "Fianna Fáil",
+    "Constituency": "Administrative Panel",
+    "Code": "Diarmuid-Wilson.S.2002-09-12",
+    "Committees": [
+      "Joint Committee on Defence and National Security (Leas-Chathaoirleach)",
+      "Joint Committee on Fisheries and Maritime Affairs"
+    ]
+  }
+]

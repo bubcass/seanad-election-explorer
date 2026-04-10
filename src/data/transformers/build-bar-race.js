@@ -1,47 +1,89 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
-import { csvParse } from "d3-dsv";
 
 const [inputPath, outputPath] = process.argv.slice(2);
 
 if (!inputPath || !outputPath) {
-  console.error("Usage: node build-bar-race.js <input.csv> <output.json>");
+  console.error(
+    "Usage: node build-bar-race.js <input-normalised.json> <output.json>",
+  );
   process.exit(1);
 }
 
 const raw = fs.readFileSync(inputPath, "utf8");
+const payload = JSON.parse(raw);
+const rows = Array.isArray(payload?.data) ? payload.data : [];
 
-const rows = csvParse(raw, (d) => ({
-  name: d.candidate,
-  gender: d.gender,
-  party: d.party,
-  count: Number(d.count),
-  transfer: Number(d.transfer) || 0,
-  value: Number(d.total),
-  condition: d.condition || "Continuing",
-  constituency: d.constituency_x,
-  quota: Number(d.quota),
-  seats: Number(d.seats),
-}));
+const membersPath = path.resolve(
+  path.dirname(inputPath),
+  "../seanad-members.json",
+);
+const membersRaw = fs.readFileSync(membersPath, "utf8");
+const members = JSON.parse(membersRaw);
 
-const byConstituency = new Map();
-
-for (const row of rows) {
-  if (!row.constituency) continue;
-
-  if (!byConstituency.has(row.constituency)) {
-    byConstituency.set(row.constituency, []);
-  }
-
-  byConstituency.get(row.constituency).push(row);
+function clean(value) {
+  return String(value ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-const output = Array.from(byConstituency, ([constituency, records]) => {
+function canonicalPersonName(name) {
+  return String(name ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[’']/g, "'")
+    .replace(/\./g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+function findMatchingMember(name, panel) {
+  const canonName = canonicalPersonName(name);
+  const cleanPanel = clean(panel);
+
+  return (
+    members.find(
+      (m) =>
+        clean(m.Constituency) === cleanPanel &&
+        canonicalPersonName(m.Senator) === canonName,
+    ) ?? null
+  );
+}
+
+const byPanel = new Map();
+
+for (const row of rows) {
+  if (!row.panel || !row.name || !Number.isFinite(row.count)) continue;
+
+  const matched = findMatchingMember(row.name, row.panel);
+
+  if (!byPanel.has(row.panel)) {
+    byPanel.set(row.panel, []);
+  }
+
+  byPanel.get(row.panel).push({
+    name: row.name,
+    firstName: row.firstName ?? null,
+    surname: row.surname ?? null,
+    party: matched?.Party ?? null,
+    subPanel: row.subPanel ?? null,
+    count: Number(row.count),
+    transfer: Number(row.transfer) || 0,
+    value: Number(row.votes) || 0,
+    status: row.status || "Continuing",
+    panel: row.panel,
+    quota: Number(row.quota) || 0,
+    electedPosition: Number(row.electedPosition) || null,
+    electedCount: Number(row.electedCount) || null,
+  });
+}
+
+const output = Array.from(byPanel, ([panel, records]) => {
   const quota = records[0]?.quota ?? 0;
-  const seats = records[0]?.seats ?? 0;
-  const maxValue = Math.max(...records.map((d) => d.value));
-  const maxCount = Math.max(...records.map((d) => d.count));
+  const maxValue = Math.max(...records.map((d) => d.value), 0);
+  const maxCount = Math.max(...records.map((d) => d.count), 0);
 
   const candidates = Array.from(
     new Map(
@@ -49,12 +91,27 @@ const output = Array.from(byConstituency, ([constituency, records]) => {
         d.name,
         {
           name: d.name,
+          firstName: d.firstName,
+          surname: d.surname,
           party: d.party,
-          gender: d.gender,
+          subPanel: d.subPanel,
+          electedPosition: d.electedPosition,
+          electedCount: d.electedCount,
         },
       ]),
     ).values(),
-  ).sort((a, b) => a.name.localeCompare(b.name));
+  ).sort((a, b) => {
+    return (
+      String(a.surname ?? a.name).localeCompare(
+        String(b.surname ?? b.name),
+        "en",
+        { sensitivity: "base" },
+      ) ||
+      String(a.name).localeCompare(String(b.name), "en", {
+        sensitivity: "base",
+      })
+    );
+  });
 
   const countsMap = new Map();
 
@@ -71,7 +128,7 @@ const output = Array.from(byConstituency, ([constituency, records]) => {
     const frame = countsMap.get(row.count);
     frame.values[row.name] = row.value;
     frame.transfers[row.name] = row.transfer;
-    frame.status[row.name] = row.condition;
+    frame.status[row.name] = row.status;
   }
 
   const counts = Array.from(countsMap.values()).sort(
@@ -79,18 +136,21 @@ const output = Array.from(byConstituency, ([constituency, records]) => {
   );
 
   return {
-    constituency,
+    panel,
     quota,
-    seats,
     maxValue,
     maxCount,
     candidates,
     counts,
   };
-}).sort((a, b) => a.constituency.localeCompare(b.constituency));
+}).sort((a, b) =>
+  String(a.panel).localeCompare(String(b.panel), "en", {
+    sensitivity: "base",
+  }),
+);
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
 
-console.log(`Built bar-race data for ${output.length} constituencies`);
+console.log(`Built bar-race data for ${output.length} panels`);
 console.log(`Saved to ${outputPath}`);

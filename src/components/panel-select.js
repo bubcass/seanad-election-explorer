@@ -1,6 +1,6 @@
-export function constituencySelect({
+export function panelSelect({
   state = {
-    constituency: null,
+    panel: null,
   },
   resultsPromise = Promise.resolve([]),
   onChange = () => {},
@@ -23,19 +23,19 @@ export function constituencySelect({
   }
 
   function render(options = []) {
-    if (!state.constituency && options.length) {
-      state.constituency = options[0];
+    if (!state.panel && options.length) {
+      state.panel = options[0];
     }
 
     container.innerHTML = `
-      <div class="control control--constituency">
-        <label for="constituency-select" class="control-label">Select a constituency</label>
-        <select id="constituency-select" name="Select a constituency" class="control-input">
+      <div class="control control--panel">
+        <label for="panel-select" class="control-label">Select a panel</label>
+        <select id="panel-select" name="Select a panel" class="control-input">
           ${options
             .map(
               (value) => `
                 <option value="${escapeHtml(value)}" ${
-                  state.constituency === value ? "selected" : ""
+                  state.panel === value ? "selected" : ""
                 }>
                   ${escapeHtml(value)}
                 </option>
@@ -48,7 +48,7 @@ export function constituencySelect({
 
     const select = container.querySelector("select");
     select?.addEventListener("change", () => {
-      state.constituency = select.value;
+      state.panel = select.value;
       onChange(state);
     });
   }
@@ -56,9 +56,7 @@ export function constituencySelect({
   Promise.resolve(resultsPromise)
     .then((rows) => {
       const options = uniqueSorted(
-        (Array.isArray(rows) ? rows : [])
-          .map((d) => d.constituency)
-          .filter(Boolean),
+        (Array.isArray(rows) ? rows : []).map((d) => d.panel).filter(Boolean),
       );
 
       render(options);

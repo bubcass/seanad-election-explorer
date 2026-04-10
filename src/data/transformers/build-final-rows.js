@@ -7,12 +7,12 @@ const __dirname = path.dirname(__filename);
 
 const INPUT_PATH = path.resolve(
   __dirname,
-  "../derived/election-2024-normalised.json",
+  "../derived/election-2025-normalised.json",
 );
 
 const OUTPUT_PATH = path.resolve(
   __dirname,
-  "../derived/election-2024-final-rows.json",
+  "../derived/election-2025-final-rows.json",
 );
 
 function compareRows(a, b) {
@@ -25,10 +25,11 @@ function compareRows(a, b) {
 
 function sortFinalRows(a, b) {
   return (
-    String(a.constituency).localeCompare(String(b.constituency), "en", {
+    String(a.panel).localeCompare(String(b.panel), "en", {
       sensitivity: "base",
     }) ||
-    Number(b.votes) - Number(a.votes) ||
+    Number(a.electedPosition ?? 999) - Number(b.electedPosition ?? 999) ||
+    Number(b.votes ?? 0) - Number(a.votes ?? 0) ||
     String(a.name).localeCompare(String(b.name), "en", {
       sensitivity: "base",
     })
@@ -39,24 +40,26 @@ async function main() {
   const payload = JSON.parse(await fs.readFile(INPUT_PATH, "utf8"));
   const rows = payload?.data ?? [];
 
-  const byConstituencyAndCandidate = new Map();
+  const byPanelAndCandidate = new Map();
 
   for (const row of rows) {
-    const key = `${row.constituency}|||${row.name}`;
-    const existing = byConstituencyAndCandidate.get(key);
+    if (!row.panel || !row.name) continue;
+
+    const key = `${row.panel}|||${row.name}`;
+    const existing = byPanelAndCandidate.get(key);
 
     if (!existing || compareRows(existing, row) < 0) {
-      byConstituencyAndCandidate.set(key, row);
+      byPanelAndCandidate.set(key, row);
     }
   }
 
-  const finalRows = Array.from(byConstituencyAndCandidate.values()).sort(
+  const finalRows = Array.from(byPanelAndCandidate.values()).sort(
     sortFinalRows,
   );
 
   const output = {
     generatedAt: new Date().toISOString(),
-    sourceFile: "election-2024-normalised.json",
+    sourceFile: "election-2025-normalised.json",
     rowCount: finalRows.length,
     fields: payload?.fields ?? [],
     data: finalRows,

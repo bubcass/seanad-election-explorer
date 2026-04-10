@@ -9,101 +9,53 @@ toc: false
 ```js
 import * as d3 from "npm:d3";
 import * as Plot from "npm:@observablehq/plot";
-import { constituencyMap } from "./components/constituency-map.js";
-import { electionTimelineControls } from "./components/election-timeline-controls.js";
 import { electionBarRace } from "./components/electionBarRace.js";
-
-async function ensureLeafletCss() {
-  if (typeof document === "undefined") return;
-
-  const existing = document.getElementById("leaflet-css-cdn");
-  if (existing) {
-    if (existing.dataset.loaded === "true") return;
-
-    await new Promise((resolve, reject) => {
-      existing.addEventListener(
-        "load",
-        () => {
-          existing.dataset.loaded = "true";
-          resolve();
-        },
-        { once: true }
-      );
-      existing.addEventListener("error", reject, { once: true });
-    });
-
-    return;
-  }
-
-  await new Promise((resolve, reject) => {
-    const link = document.createElement("link");
-    link.id = "leaflet-css-cdn";
-    link.rel = "stylesheet";
-    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-
-    link.addEventListener(
-      "load",
-      () => {
-        link.dataset.loaded = "true";
-        resolve();
-      },
-      { once: true }
-    );
-
-    link.addEventListener("error", reject, { once: true });
-
-    document.head.appendChild(link);
-  });
-}
-
-ensureLeafletCss();
+import { panelSelect } from "./components/panel-select.js";
+import { renderTimelineControls } from "./components/renderTimelineControls.js";
 
 const format = d3.format(",d");
-const heroVideoPromise = FileAttachment("media/election.mp4").url();
+const heroImagePromise = FileAttachment("media/seanad_election.jpg").url();
 
 const normalisedPromise = FileAttachment(
-  "data/derived/election-2024-normalised.json"
+  "data/derived/election-2025-normalised.json"
 ).json();
 
 const finalRowsPromise = FileAttachment(
-  "data/derived/election-2024-final-rows.json"
+  "data/derived/election-2025-final-rows.json"
 ).json();
 
 const barRacePromise = FileAttachment(
   "data/derived/bar-race.json"
 ).json();
 
-const constituenciesGeoPromise = FileAttachment(
-  "data/geo/constituencies.json"
+const seanadMembersPromise = FileAttachment(
+  "data/seanad-members.json"
 ).json();
 
-const membersLookupPromise = FileAttachment(
-  "data/members-lookup.json"
-).json();
+const subPanelColorMap = new Map([
+  ["Nominating Bodies", "#1f77b4"],
+  ["Oireachtas", "#ff7f0e"]
+]);
 
-const downloadHrefPromise = FileAttachment(
-  "data/election_2024_cleaned.csv"
-).url();
-
-const partyColorMap = new Map([
-  ["Fianna Fáil", "#2c8737"],
-  ["Sinn Féin", "#088460"],
-  ["Fine Gael", "#303591"],
-  ["Independent", "#666666"],
-  ["Labour Party", "#c82832"],
-  ["Social Democrats", "#782b81"],
-  ["Independent Ireland", "#087b87"],
-  ["People Before Profit-Solidarity", "#be417d"],
-  ["Aontú", "#b35400"],
-  ["100% RDR", "#985564"],
-  ["Green Party", "#6c7e26"],
-  ["Irish Freedom Party", "#1f77b4"],
-  ["Liberty Republic", "#ff7f0e"]
+const statusColorMap = new Map([
+  ["Deemed Elected", "#ff7f0e"],
+  ["Continuing", "#1f77b4"],
+  ["Excluded", "#dadbdc"]
 ]);
 
 if (typeof window !== "undefined" && !window.__electionsResizeObserver) {
+  let resizeRaf = null;
+  let lastHeight = 0;
+
   window.__electionsResizeObserver = new ResizeObserver(([entry]) => {
-    parent.postMessage({ height: entry.target.scrollHeight }, "*");
+    const nextHeight = entry.target.scrollHeight;
+    if (nextHeight === lastHeight) return;
+    lastHeight = nextHeight;
+
+    cancelAnimationFrame(resizeRaf);
+    resizeRaf = requestAnimationFrame(() => {
+      parent.postMessage({ height: nextHeight }, "*");
+    });
   });
 
   window.__electionsResizeObserver.observe(document.body);
@@ -111,9 +63,9 @@ if (typeof window !== "undefined" && !window.__electionsResizeObserver) {
 
 if (!window.electionsState) {
   window.electionsState = {
-    constituency: "Carlow-Kilkenny",
+    panel: null,
     count: null,
-    colorMode: "party",
+    colorMode: "subPanel",
     tableSort: "status",
     candidateFocus: null
   };
@@ -145,7 +97,6 @@ function mountReactive(className, renderFn, options = {}) {
   }
 
   const { debounceMs = 50, skeletonDelay = 120 } = options;
-
   const el = document.createElement("div");
   if (className) el.className = className;
 
@@ -179,7 +130,6 @@ function mountReactive(className, renderFn, options = {}) {
   };
 
   window.addEventListener("elections:change", onChange);
-
   return el;
 }
 
@@ -187,34 +137,15 @@ function clean(value) {
   return String(value ?? "").replace(/\s+/g, " ").trim();
 }
 
-function cleanConstituencyName(name) {
-  return clean(name).replace(/\s*\(\d+\)\s*$/, "");
-}
-
 function canonicalPersonName(name) {
-  const raw = clean(name)
+  return String(name ?? "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[’']/g, "'")
     .replace(/\./g, "")
-    .replace(/\s+/g, " ");
-
-  if (!raw) return "";
-
-  if (raw.includes(",")) {
-    const [surname, rest] = raw.split(",", 2);
-    return `${clean(rest)} ${clean(surname)}`.toLowerCase();
-  }
-
-  return raw.toLowerCase();
-}
-
-function getDisplayNameFromElection(name) {
-  const raw = clean(name);
-  if (!raw.includes(",")) return raw;
-
-  const [surname, rest] = raw.split(",", 2);
-  return `${clean(rest)} ${clean(surname)}`;
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
 }
 
 function fixPlotAria(svgOrRoot) {
@@ -233,67 +164,6 @@ function fixPlotAria(svgOrRoot) {
       node.removeAttribute("aria-label");
     }
   });
-}
-
-function getColorChoices(rows) {
-  const partiesPalette = [
-    { name: "Fianna Fáil", value: "#40b34e" },
-    { name: "Sinn Féin", value: "#088460" },
-    { name: "Fine Gael", value: "#303591" },
-    { name: "Independent", value: "#666666" },
-    { name: "Labour Party", value: "#c82832" },
-    { name: "Social Democrats", value: "#782b81" },
-    { name: "Independent Ireland", value: "#17becf" },
-    { name: "People Before Profit-Solidarity", value: "#c5568b" },
-    { name: "Aontú", value: "#ff7f0e" },
-    { name: "100% RDR", value: "#985564" },
-    { name: "Green Party", value: "#b4d143" },
-    { name: "Irish Freedom Party", value: "#1f77b4" },
-    { name: "Liberty Republic", value: "#ff7f0e" }
-  ];
-
-  const fallbackColors = [
-    "#1f77b4",
-    "#ff7f0e",
-    "#2ca02c",
-    "#d62728",
-    "#9467bd",
-    "#8c564b",
-    "#e377c2",
-    "#7f7f7f",
-    "#bcbd22",
-    "#17becf"
-  ];
-
-  const fullMap = new Map(partiesPalette.map((d) => [d.name, d.value]));
-  let fallbackIndex = 0;
-
-  const partiesInUse = Array.from(
-    new Set(rows.map((d) => d.party).filter(Boolean))
-  );
-
-  for (const party of partiesInUse) {
-    if (!fullMap.has(party)) {
-      fullMap.set(
-        party,
-        fallbackColors[fallbackIndex % fallbackColors.length]
-      );
-      fallbackIndex += 1;
-    }
-  }
-
-  return {
-    party: {
-      field: "party",
-      domain: partiesInUse,
-      range: partiesInUse.map((p) => fullMap.get(p))
-    },
-    status: {
-      field: "status",
-      domain: ["Elected", "Continuing", "Eliminated"],
-      range: ["#ff7f0e", "#1f77b4", "#dadbdc"]
-    }
-  };
 }
 
 function renderColorLegend(colorChoice) {
@@ -326,9 +196,56 @@ function renderColorLegend(colorChoice) {
 
 function renderStatusLegend() {
   return renderColorLegend({
-    domain: ["Elected", "Continuing", "Eliminated"],
+    domain: ["Deemed Elected", "Continuing", "Excluded"],
     range: ["#ff7f0e", "#1f77b4", "#dadbdc"]
   });
+}
+
+function renderSegmentedControl({
+  label = "",
+  name = "",
+  options = [],
+  value = "",
+  onChange = () => {}
+} = {}) {
+  const wrap = document.createElement("div");
+  wrap.className = "segmented-control-wrap";
+
+  const group = document.createElement("div");
+  group.className = "segmented-control";
+  group.setAttribute("role", "radiogroup");
+  if (label) group.setAttribute("aria-label", label);
+
+  for (const option of options) {
+    const controlId = `${name}-${String(option.value)
+      .replace(/\s+/g, "-")
+      .toLowerCase()}`;
+
+    const labelEl = document.createElement("label");
+    labelEl.className = "segmented-control__option";
+    labelEl.setAttribute("for", controlId);
+
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = name;
+    input.id = controlId;
+    input.value = option.value;
+    input.checked = option.value === value;
+
+    input.addEventListener("change", () => {
+      if (input.checked) onChange(option.value);
+    });
+
+    const text = document.createElement("span");
+    text.textContent = option.label;
+
+    labelEl.appendChild(input);
+    labelEl.appendChild(text);
+    group.appendChild(labelEl);
+  }
+
+  wrap.appendChild(group);
+  return wrap;
 }
 
 async function getResults() {
@@ -341,63 +258,137 @@ async function getFinalRows() {
   return payload.data ?? [];
 }
 
-async function getBarRaceConstituency() {
-  const data = await barRacePromise;
-  const { constituency } = getState();
-  return data.find((d) => d.constituency === constituency) ?? null;
+async function getSeanadMembers() {
+  return await seanadMembersPromise;
 }
 
-async function getConstituenciesGeo() {
-  return await constituenciesGeoPromise;
-}
-
-async function getMembersLookup() {
-  return await membersLookupPromise;
-}
-
-async function getMembersArray() {
-  const lookup = await getMembersLookup();
-  return Object.values(lookup ?? {});
-}
-
-async function getFilteredConstituencyGeo() {
-  const selected = getState().constituency;
-  const constituenciesGeo = await getConstituenciesGeo();
-
-  return {
-    type: "FeatureCollection",
-    features: constituenciesGeo.features.filter(
-      (feature) =>
-        cleanConstituencyName(feature?.properties?.ENG_NAME_VALUE) === selected
-    )
-  };
-}
-
-async function getAvailableConstituencies() {
+async function getAvailablePanels() {
   const rows = await getResults();
-  return Array.from(new Set(rows.map((d) => d.constituency).filter(Boolean))).sort(
+  return Array.from(new Set(rows.map((d) => d.panel).filter(Boolean))).sort(
     (a, b) => a.localeCompare(b, "en")
   );
 }
 
-async function getConstituencySummary() {
+async function getCandidateOptions() {
+  const rows = await getResults();
+  const panel = await ensureValidPanelSelection();
+
+  if (!panel) return [];
+
+  return Array.from(
+    new Set(
+      rows
+        .filter((d) => d.panel === panel)
+        .map((d) => clean(d.name))
+        .filter(Boolean)
+    )
+  ).sort((a, b) => a.localeCompare(b, "en"));
+}
+
+async function ensureValidCandidateFocus() {
+  const options = await getCandidateOptions();
+
+  if (!options.length) {
+    window.electionsState.candidateFocus = null;
+    return null;
+  }
+
+  if (
+    !window.electionsState.candidateFocus ||
+    !options.includes(window.electionsState.candidateFocus)
+  ) {
+    window.electionsState.candidateFocus = options[0];
+  }
+
+  return window.electionsState.candidateFocus;
+}
+
+async function getCandidateRecord() {
+  const rows = await getResults();
+  const panel = await ensureValidPanelSelection();
+  const candidate = await ensureValidCandidateFocus();
+
+  if (!panel || !candidate) return [];
+
+  return rows
+    .filter(
+      (d) => d.panel === panel && clean(d.name) === clean(candidate)
+    )
+    .map((d) => ({
+      ...d,
+      displayName: clean(d.name)
+    }))
+    .sort((a, b) => d3.ascending(a.count, b.count));
+}
+
+async function getCandidateNarrative() {
+  const candidateRecord = await getCandidateRecord();
+  if (!candidateRecord.length) return "";
+
+  const latest = candidateRecord[candidateRecord.length - 1];
+  const firstQuotaHit = candidateRecord.find(
+    (d) => Number(d.votes ?? 0) >= Number(d.quota ?? Infinity)
+  );
+
+  if (firstQuotaHit) {
+    return `<strong>${latest.displayName}</strong> ran on the <strong>${latest.subPanel ?? "Unknown"}</strong> sub-panel and exceeded the quota on count No. <strong>${firstQuotaHit.count}</strong>.`;
+  }
+
+  return `<strong>${latest.displayName}</strong> ran on the <strong>${latest.subPanel ?? "Unknown"}</strong> subpanel and did not exceed the quota.`;
+}
+
+async function ensureValidPanelSelection() {
+  const panels = await getAvailablePanels();
+
+  if (!panels.length) {
+    window.electionsState.panel = null;
+    return null;
+  }
+
+  if (!window.electionsState.panel || !panels.includes(window.electionsState.panel)) {
+    window.electionsState.panel = panels[0];
+  }
+
+  return window.electionsState.panel;
+}
+
+function getMemberPageUrl(code) {
+  const cleaned = clean(code);
+  return cleaned
+    ? `https://www.oireachtas.ie/en/members/member/${cleaned}`
+    : null;
+}
+
+function getMemberImageUrl(code) {
+  const cleaned = clean(code);
+  return cleaned
+    ? `https://data.oireachtas.ie/ie/oireachtas/member/id/${cleaned}/image/large`
+    : null;
+}
+
+async function getPanelSummary() {
   const rows = await getFinalRows();
-  const { constituency } = getState();
+  const panel = await ensureValidPanelSelection();
+
+  if (!panel) return null;
 
   const filtered = rows
-    .filter((d) => d.constituency === constituency)
+    .filter((d) => d.panel === panel)
     .sort((a, b) => d3.descending(a.votes, b.votes));
 
   if (!filtered.length) return null;
 
   const elected = filtered
-    .filter((d) => d.status === "Elected")
-    .sort((a, b) => d3.descending(a.votes, b.votes));
+    .filter((d) => d.status === "Deemed Elected")
+    .sort((a, b) => {
+      const aPos = Number.isFinite(a.electedPosition) ? a.electedPosition : 999;
+      const bPos = Number.isFinite(b.electedPosition) ? b.electedPosition : 999;
+      return d3.ascending(aPos, bPos) || d3.descending(a.votes, b.votes);
+    });
 
   return {
-    constituency,
+    panel,
     quota: filtered[0].quota,
-    seats: filtered[0].seats,
     totalCandidates: filtered.length,
     elected,
     finalRows: filtered
@@ -405,47 +396,65 @@ async function getConstituencySummary() {
 }
 
 async function getMatchedElectedMembers() {
-  const summary = await getConstituencySummary();
-  const members = await getMembersArray();
+  const [summary, members] = await Promise.all([
+    getPanelSummary(),
+    getSeanadMembers()
+  ]);
 
   if (!summary?.elected?.length) return [];
 
-  const constituency = clean(summary.constituency);
-
-  const membersInConstituency = members.filter(
-    (d) => clean(d.constituency) === constituency
+  const membersInPanel = members.filter(
+    (d) => clean(d.Constituency) === clean(summary.panel)
   );
 
-  return summary.elected.map((row) => {
-    const electionNameCanonical = canonicalPersonName(row.name);
+  return summary.elected
+    .map((row) => {
+      const matched =
+        membersInPanel.find(
+          (m) =>
+            canonicalPersonName(m.Senator) ===
+            canonicalPersonName(row.name)
+        ) ?? null;
 
-    const matched =
-      membersInConstituency.find(
-        (m) => canonicalPersonName(m.memberName) === electionNameCanonical
-      ) ?? null;
+      const code = matched?.Code ?? null;
 
-    return {
-      ...row,
-      displayName: matched?.memberName ?? getDisplayNameFromElection(row.name),
-      memberCode: matched?.memberCode ?? null,
-      memberUrl: matched?.memberUrl ?? null,
-      imageUrl: matched?.memberCode
-        ? `https://data.oireachtas.ie/ie/oireachtas/member/id/${matched.memberCode}/image/large`
-        : null,
-      matchedParty: matched?.party ?? row.party
-    };
-  });
+      return {
+        ...row,
+        displayName: matched?.Senator ?? row.name,
+        matchedParty: matched?.Party ?? null,
+        memberUrl: getMemberPageUrl(code),
+        imageUrl: getMemberImageUrl(code),
+        subPanel: row.subPanel ?? null
+      };
+    })
+    .sort((a, b) => {
+      const aPos = Number.isFinite(a.electedPosition) ? a.electedPosition : 999;
+      const bPos = Number.isFinite(b.electedPosition) ? b.electedPosition : 999;
+      return d3.ascending(aPos, bPos) || d3.ascending(a.displayName, b.displayName);
+    });
+}
+
+async function getBarRacePanel() {
+  const data = await barRacePromise;
+  const panel = await ensureValidPanelSelection();
+
+  if (!panel) return null;
+
+  return data.find((d) => d.panel === panel) ?? null;
 }
 
 async function getCountRows() {
   const rows = await getResults();
-  const { constituency, count } = getState();
+  const panel = await ensureValidPanelSelection();
+  const { count } = getState();
 
-  let filtered = rows.filter((d) => d.constituency === constituency);
+  if (!panel) return [];
 
-  const availableCounts = Array.from(new Set(filtered.map((d) => d.count))).sort(
-    (a, b) => a - b
-  );
+  let filtered = rows.filter((d) => d.panel === panel);
+
+  const availableCounts = Array.from(
+    new Set(filtered.map((d) => d.count).filter(Number.isFinite))
+  ).sort((a, b) => a - b);
 
   const activeCount = Number.isFinite(count)
     ? count
@@ -458,11 +467,16 @@ async function getCountRows() {
 
 async function getActiveCountLabel() {
   const rows = await getResults();
-  const { constituency, count } = getState();
+  const panel = await ensureValidPanelSelection();
+  const { count } = getState();
 
-  const constituencyRows = rows.filter((d) => d.constituency === constituency);
+  if (!panel) {
+    return { activeCount: null, maxCount: null };
+  }
+
+  const panelRows = rows.filter((d) => d.panel === panel);
   const availableCounts = Array.from(
-    new Set(constituencyRows.map((d) => d.count))
+    new Set(panelRows.map((d) => d.count).filter(Number.isFinite))
   ).sort((a, b) => a - b);
 
   const activeCount = Number.isFinite(count)
@@ -477,23 +491,22 @@ async function getActiveCountLabel() {
 
 async function getWaffleRows() {
   const rows = await getCountRows();
-  const summary = await getConstituencySummary();
+  const summary = await getPanelSummary();
 
-  if (!rows.length || !summary) return { rows: [], quota: 0, seats: 0 };
+  if (!rows.length || !summary) return { rows: [], quota: 0 };
 
   const quota = summary.quota ?? 0;
-  const seats = summary.seats ?? 0;
 
   const prepared = rows
     .map((d) => ({
       ...d,
-      displayName: getDisplayNameFromElection(d.name),
-      surnameKey: clean(d.name).toLowerCase(),
+      displayName: clean(d.name),
+      surnameKey: clean(d.surname ?? d.name).toLowerCase(),
       quotaPct: quota > 0 ? (d.votes / quota) * 100 : 0
     }))
     .sort((a, b) => d3.ascending(a.surnameKey, b.surnameKey));
 
-  return { rows: prepared, quota, seats };
+  return { rows: prepared, quota };
 }
 
 function splitIntoTwoRows(rows) {
@@ -522,12 +535,12 @@ function renderQuotaWaffleChunk(rows, { width = 1000 } = {}) {
   const chart = Plot.plot({
     style: {
       fontFamily: "IBM Plex Sans",
-      fontSize: 14,
+      fontSize: 11,
       padding: "5px"
     },
     color: {
       legend: false,
-      domain: ["Elected", "Continuing", "Eliminated"],
+      domain: ["Deemed Elected", "Continuing", "Excluded"],
       range: ["#ff7f0e", "#1f77b4", "#dadbdc"]
     },
     axis: null,
@@ -596,8 +609,8 @@ function renderQuotaWaffleChunk(rows, { width = 1000 } = {}) {
       tooltip.innerHTML = `
         <div><strong>${d.displayName}</strong></div>
         <div>Votes: ${format(d.votes)}</div>
-        <div>Party: ${d.party ?? "—"}</div>
-        <div>Electoral status: ${d.status ?? "—"}</div>
+        <div>Sub-panel: ${d.subPanel ?? "—"}</div>
+        <div>Status: ${d.status ?? "—"}</div>
       `;
 
       const wrapRect = wrap.getBoundingClientRect();
@@ -641,152 +654,149 @@ function renderQuotaWaffleChunk(rows, { width = 1000 } = {}) {
   return wrap;
 }
 
-function renderConstituencySelect(options, selectedValue) {
-  const wrap = document.createElement("div");
-  wrap.className = "election-constituency-select";
-
-  wrap.innerHTML = `
-    <label class="control control--constituency">
-      <span class="control-label">Select a constituency</span>
-      <select class="control-input">
-        ${options
-          .map(
-            (value) => `
-              <option value="${value}" ${value === selectedValue ? "selected" : ""}>
-                ${value}
-              </option>
-            `
-          )
-          .join("")}
-      </select>
-    </label>
-  `;
-
-  const select = wrap.querySelector("select");
-
-  select?.addEventListener("change", () => {
-    window.electionsState.constituency = select.value;
-    window.electionsState.count = null;
-    window.electionsState.candidateFocus = null;
-    window.dispatchEvent(new CustomEvent("elections:change"));
-  });
-
-  return wrap;
-}
-
-function renderSegmentedControl({
-  label = "",
-  name = "",
-  options = [],
-  value = "",
-  onChange = () => {}
-} = {}) {
-  const wrap = document.createElement("div");
-  wrap.className = "segmented-control-wrap";
-
-  const group = document.createElement("div");
-  group.className = "segmented-control";
-  group.setAttribute("role", "radiogroup");
-  if (label) group.setAttribute("aria-label", label);
-
-  for (const option of options) {
-    const controlId = `${name}-${String(option.value).replace(/\s+/g, "-").toLowerCase()}`;
-
-    const labelEl = document.createElement("label");
-    labelEl.className = "segmented-control__option";
-    labelEl.setAttribute("for", controlId);
-
-    const input = document.createElement("input");
-    input.type = "radio";
-    input.name = name;
-    input.id = controlId;
-    input.value = option.value;
-    input.checked = option.value === value;
-
-    input.addEventListener("change", () => {
-      if (input.checked) onChange(option.value);
-    });
-
-    const text = document.createElement("span");
-    text.textContent = option.label;
-
-    labelEl.appendChild(input);
-    labelEl.appendChild(text);
-    group.appendChild(labelEl);
+function getLollipopColorChoice(mode = "subPanel") {
+  if (mode === "status") {
+    return {
+      label: "Status in poll",
+      domain: ["Deemed Elected", "Continuing", "Excluded"],
+      range: ["#ff7f0e", "#1f77b4", "#dadbdc"],
+      value: (d) => d.status ?? "Continuing"
+    };
   }
 
-  wrap.appendChild(group);
-  return wrap;
+  return {
+    label: "Sub-panel type",
+    domain: ["Nominating Bodies", "Oireachtas"],
+    range: ["#1f77b4", "#ff7f0e"],
+    value: (d) => d.subPanel ?? "Nominating Bodies"
+  };
 }
 
-async function getCandidateOptions() {
-  const rows = await getResults();
-  const { constituency } = getState();
-
-  return Array.from(
-    new Set(
-      rows
-        .filter((d) => d.constituency === constituency)
-        .map((d) => d.name)
-        .filter(Boolean)
-    )
-  ).sort((a, b) => a.localeCompare(b, "en"));
-}
-
-async function ensureValidCandidateFocus() {
-  const options = await getCandidateOptions();
-
-  if (!options.length) {
-    window.electionsState.candidateFocus = null;
-    return null;
-  }
-
-  if (
-    !window.electionsState.candidateFocus ||
-    !options.includes(window.electionsState.candidateFocus)
-  ) {
-    window.electionsState.candidateFocus = options[0];
-  }
-
-  return window.electionsState.candidateFocus;
-}
-
-async function getCandidateRecord() {
-  const rows = await getResults();
-  const { constituency } = getState();
-  const selectedCandidate = await ensureValidCandidateFocus();
-
-  if (!selectedCandidate) return [];
-
-  return rows
-    .filter(
-      (d) => d.constituency === constituency && d.name === selectedCandidate
-    )
-    .map((d) => ({
-      ...d,
-      displayName: getDisplayNameFromElection(d.name)
-    }))
-    .sort((a, b) => d3.ascending(a.count, b.count));
-}
-
-async function getCandidateNarrative() {
-  const [candidateRecord, summary] = await Promise.all([
-    getCandidateRecord(),
-    getConstituencySummary()
+async function getLollipopRows() {
+  const [rows, summary, { activeCount }] = await Promise.all([
+    getCountRows(),
+    getPanelSummary(),
+    getActiveCountLabel()
   ]);
 
-  if (!candidateRecord.length || !summary) return null;
-
-  const candidate = candidateRecord[0];
-  const quota = summary.quota ?? 0;
-  const firstAboveQuota = candidateRecord.find((d) => (d.votes ?? 0) > quota);
-
-  if (firstAboveQuota) {
-    return `<strong>${candidate.displayName}</strong> ran as a <strong>${candidate.party ?? "Independent"}</strong> candidate and <strong>exceeded the quota</strong> on count No. ${firstAboveQuota.count}.`;
+  if (!rows.length || !summary) {
+    return { rows: [], quota: 0, count: activeCount };
   }
 
-  const peakVotes = d3.max(candidateRecord, (d) => d.votes) ?? 0;
-  return `<strong>${candidate.displayName}</strong> ran as a <strong>${candidate.party ?? "Independent"}</strong> candidate and <strong>did not exceed the quota</strong>, reaching a peak of ${format(peakVotes)} votes.`;
+  const prepared = rows
+    .map((d) => ({
+      ...d,
+      displayName: clean(d.name)
+    }))
+    .sort((a, b) => {
+      const aPos = Number.isFinite(a.position) ? a.position : 999;
+      const bPos = Number.isFinite(b.position) ? b.position : 999;
+      return d3.ascending(aPos, bPos) || d3.descending(a.votes, b.votes);
+    });
+
+  return {
+    rows: prepared,
+    quota: summary.quota ?? 0,
+    count: activeCount
+  };
+}
+
+function renderLollipopChart(
+  rows,
+  {
+    width = 790,
+    quota = 0,
+    count = null,
+    colorMode = "subPanel"
+  } = {}
+) {
+  const colorChoice = getLollipopColorChoice(colorMode);
+
+  const chartRows = rows.map((d) => ({
+    ...d,
+    colorKey: colorChoice.value(d) ?? colorChoice.domain[0]
+  }));
+
+  const yDomain = chartRows
+    .slice()
+    .sort((a, b) => {
+      const aPos = Number.isFinite(a.position) ? a.position : 999;
+      const bPos = Number.isFinite(b.position) ? b.position : 999;
+      return d3.ascending(aPos, bPos) || d3.descending(a.votes, b.votes);
+    })
+    .map((d) => d.displayName ?? d.name);
+
+  const chart = Plot.plot({
+    width,
+    height: Math.max(420, chartRows.length * 30 + 70),
+    marginBottom: 45,
+    marginLeft: 210,
+    marginRight: 90,
+    color: {
+      legend: false,
+      domain: colorChoice.domain,
+      range: colorChoice.range
+    },
+    style: {
+      fontSize: 14,
+      fontFamily: "IBM Plex Sans"
+    },
+    x: {
+      tickPadding: 6,
+      tickSize: 5,
+      grid: true,
+      tickRotate: -10,
+      label: "Votes"
+    },
+    y: {
+      label: null,
+      tickSize: 0,
+      domain: yDomain
+    },
+    marks: [
+      Plot.ruleX([quota], {
+        stroke: "#6b5922",
+        strokeWidth: 2,
+        strokeDasharray: "4,4"
+      }),
+      Plot.ruleY(chartRows, {
+        x: "votes",
+        y: "displayName",
+        strokeWidth: 2,
+        stroke: "colorKey",
+        title: (d) =>
+          `After count No. ${d.count}, ${d.displayName ?? d.name} had ${format(
+            d.votes
+          )} votes. Quota: ${format(quota)}.`
+      }),
+      Plot.text(
+        chartRows.filter((d) => d.votes > 0),
+        {
+          x: "votes",
+          y: "displayName",
+          text: (d) => format(d.votes),
+          dx: 30,
+          dy: 0,
+          textAnchor: "start",
+          fill: "#4a463d",
+          fontSize: 12
+        }
+      ),
+      Plot.dot(chartRows, {
+        x: "votes",
+        y: "displayName",
+        fill: "colorKey",
+        r: 5,
+        title: (d) =>
+          `After count No. ${d.count}, ${d.displayName ?? d.name} had ${format(
+            d.votes
+          )} votes. Quota: ${format(quota)}.`
+      })
+    ]
+  });
+
+  fixPlotAria(chart);
+  return chart;
 }
 ```
 
@@ -798,26 +808,23 @@ display(
       return;
     }
 
-    const heroVideo = await heroVideoPromise;
+    const heroImage = await heroImagePromise;
     if (!isCurrent()) return;
 
     el.innerHTML = `
       <div class="hero__media">
-        <video
-          class="hero__video"
-          src="${heroVideo}"
-          autoplay
-          muted
-          loop
-          playsinline
-        ></video>
+        <img
+          class="hero__image"
+          src="${heroImage}"
+          alt="Seanad chamber"
+        />
       </div>
       <div class="hero__overlay">
         <div class="hero__content">
           <p class="hero__eyebrow">Open data insights</p>
-          <h1 class="hero__title">Election Explorer: 34th Dáil</h1>
+          <h1 class="hero__title">Election Explorer: Seanad 2025</h1>
           <p class="hero__subtitle">
-            A data-driven exploration of the 2024 general election.
+            A data-driven exploration of the 2025 Seanad general election.
           </p>
         </div>
       </div>
@@ -828,29 +835,28 @@ display(
 
 <div class="prose-block">
 
-The latest election of TDs took place in November 2024 and 174 Members were returned from 43 constituencies. Take a look at how it unfolded by constituency,  count and candidate.
+The 2025 Seanad election returned Senators across the vocational panels. Take a look at how the election unfolded by panel, count and candidate.
 
 </div>
 
 ```js
 display(
-  mountReactive("constituency-top-panel", async (el, { skeletonOnly, isCurrent }) => {
+  mountReactive("panel-top-panel", async (el, { skeletonOnly, isCurrent }) => {
     if (skeletonOnly) {
       el.innerHTML = `
-        <section class="constituency-top">
-          <div class="constituency-top__row">
-            <div class="constituency-top__info">
+        <section class="panel-top">
+          <div class="panel-top__row">
+            <div class="panel-top__info">
               <div class="text-skeleton">
                 <div class="text-skeleton__line text-skeleton__line--w72 skeleton-shimmer"></div>
                 <div class="text-skeleton__line text-skeleton__line--w100 skeleton-shimmer"></div>
                 <div class="text-skeleton__line text-skeleton__line--w92 skeleton-shimmer"></div>
               </div>
             </div>
-            <div class="map-skeleton skeleton-shimmer"></div>
           </div>
           <div class="cards-skeleton">
             <div class="cards-skeleton__inner cards-skeleton__inner--winners">
-              ${Array.from({ length: 5 }).map(() => `
+              ${Array.from({ length: 11 }).map(() => `
                 <div class="cards-skeleton__card cards-skeleton__card--winner">
                   <div class="cards-skeleton__avatar skeleton-shimmer"></div>
                   <div class="cards-skeleton__line cards-skeleton__line--name skeleton-shimmer"></div>
@@ -864,49 +870,67 @@ display(
       return;
     }
 
-    const [options, summary, geo, members] = await Promise.all([
-      getAvailableConstituencies(),
-      getConstituencySummary(),
-      getFilteredConstituencyGeo(),
+    if (!isCurrent()) return;
+
+    const section = document.createElement("section");
+    section.className = "panel-top";
+
+    const row = document.createElement("div");
+    row.className = "panel-top__row";
+
+    const info = document.createElement("div");
+    info.className = "panel-top__info";
+
+    const cardsWrap = document.createElement("div");
+    cardsWrap.className = "panel-top__cards";
+
+    info.appendChild(
+      panelSelect({
+        state: window.electionsState,
+        resultsPromise: getResults(),
+        onChange: () => {
+          window.electionsState.count = null;
+          window.electionsState.candidateFocus = null;
+          window.dispatchEvent(new CustomEvent("elections:change"));
+        }
+      })
+    );
+
+    const [summary, members] = await Promise.all([
+      getPanelSummary(),
       getMatchedElectedMembers()
     ]);
 
     if (!isCurrent()) return;
 
     if (!summary) {
-      el.innerHTML = `<p>No constituency summary available.</p>`;
+      const empty = document.createElement("div");
+      empty.className = "panel-top__summary";
+      empty.innerHTML = `<p>Select a panel to view summary information.</p>`;
+      info.appendChild(empty);
+
+      row.appendChild(info);
+      section.appendChild(row);
+      el.replaceChildren(section);
       return;
     }
 
-    const section = document.createElement("section");
-    section.className = "constituency-top";
-
-    const row = document.createElement("div");
-    row.className = "constituency-top__row";
-
-    const info = document.createElement("div");
-    info.className = "constituency-top__info";
-
-    const mapWrap = document.createElement("div");
-    mapWrap.className = "constituency-top__map";
-
-    const cardsWrap = document.createElement("div");
-    cardsWrap.className = "constituency-top__cards";
-
-    info.appendChild(renderConstituencySelect(options, getState().constituency));
-
     const summaryBlock = document.createElement("div");
-    summaryBlock.className = "constituency-top__summary";
+    summaryBlock.className = "panel-top__summary";
+
+    const electedNames = members
+      .map((d) => d.displayName ?? d.name)
+      .join(", ");
 
     summaryBlock.innerHTML = `
       <h2>Elected Members</h2>
       <p>
-        <strong>${summary.constituency}</strong> returned <strong>${summary.seats}</strong>
-        Members to the 34th Dáil.
+        The <strong>${summary.panel}</strong> returned <strong>${summary.elected.length}</strong>
+        Senators.
       </p>
       <p>
-        A total of <strong>${summary.totalCandidates}</strong> candidates contested the constituency.
-        The Members returned were <strong>${summary.elected.map((d) => getDisplayNameFromElection(d.name)).join(", ")}</strong>.
+        A total of <strong>${summary.totalCandidates}</strong> candidates contested the panel.
+        Those deemed elected were <strong>${electedNames}</strong>.
       </p>
       <p>
         The quota was <strong>${format(summary.quota)}</strong>.
@@ -915,72 +939,65 @@ display(
 
     info.appendChild(summaryBlock);
 
-    if (geo?.features?.length) {
-      mapWrap.appendChild(
-        constituencyMap(geo, {
-          height: 360,
-          popupFormatter: () =>
-            `The <strong>${summary.constituency}</strong> constituency returned <strong>${summary.seats} Members</strong>.`
-        })
-      );
+    if (!members.length) {
+      const noCards = document.createElement("p");
+      noCards.className = "chart-loading";
+      noCards.textContent = "No elected member cards available for this panel.";
+      cardsWrap.appendChild(noCards);
     } else {
-      const noMap = document.createElement("p");
-      noMap.className = "chart-loading";
-      noMap.textContent = "No map available for this constituency.";
-      mapWrap.appendChild(noMap);
-    }
+      const cardsGrid = document.createElement("div");
+      cardsGrid.className = "elected-strip";
+      cardsGrid.dataset.count = String(members.length);
 
-    const cardsGrid = document.createElement("div");
-    cardsGrid.className = "elected-strip";
-    cardsGrid.dataset.count = String(members.length);
+      for (const member of members) {
+        const subPanel = member.subPanel || "Unknown";
+        const color = subPanelColorMap.get(subPanel) ?? "#666666";
 
-    for (const member of members) {
-      const party = member.matchedParty || member.party || "Independent";
-      const color = partyColorMap.get(party) ?? "#666666";
+        const wrapper = document.createElement(member.memberUrl ? "a" : "div");
+        wrapper.className = member.memberUrl
+          ? "elected-strip__card-link"
+          : "elected-strip__card-link elected-strip__card-link--static";
 
-      const wrapper = document.createElement(member.memberUrl ? "a" : "div");
-      wrapper.className = member.memberUrl
-        ? "elected-strip__card-link"
-        : "elected-strip__card-link elected-strip__card-link--static";
+        if (member.memberUrl) {
+          wrapper.href = member.memberUrl;
+          wrapper.target = "_blank";
+          wrapper.rel = "noreferrer";
+        }
 
-      if (member.memberUrl) {
-        wrapper.href = member.memberUrl;
-        wrapper.target = "_blank";
-        wrapper.rel = "noreferrer";
-      }
+        const imageMarkup = member.imageUrl
+          ? `
+            <img
+              class="elected-strip__image"
+              src="${member.imageUrl}"
+              alt="${member.displayName}"
+              loading="lazy"
+            />
+          `
+          : `
+            <div class="elected-strip__placeholder">
+              ${member.displayName.slice(0, 1)}
+            </div>
+          `;
 
-      const imageMarkup = member.imageUrl
-        ? `
-          <img
-            class="elected-strip__image"
-            src="${member.imageUrl}"
-            alt="${member.displayName}"
-          />
-        `
-        : `
-          <div class="elected-strip__placeholder">
-            ${member.displayName.slice(0, 1)}
-          </div>
+        wrapper.innerHTML = `
+          <article class="elected-strip__card">
+            <div class="elected-strip__media" style="--party-color:${color}">
+              <div class="elected-strip__ring">
+                ${imageMarkup}
+              </div>
+            </div>
+            <div class="elected-strip__name">${member.displayName}</div>
+            <div class="elected-strip__party">${subPanel}</div>
+          </article>
         `;
 
-      wrapper.innerHTML = `
-        <article class="elected-strip__card">
-          <div class="elected-strip__media" style="--party-color:${color}">
-            <div class="elected-strip__ring">
-              ${imageMarkup}
-            </div>
-          </div>
-          <div class="elected-strip__name">${member.displayName}</div>
-          <div class="elected-strip__party">${party}</div>
-        </article>
-      `;
+        cardsGrid.appendChild(wrapper);
+      }
 
-      cardsGrid.appendChild(wrapper);
+      cardsWrap.appendChild(cardsGrid);
     }
 
-    cardsWrap.appendChild(cardsGrid);
     row.appendChild(info);
-    row.appendChild(mapWrap);
     section.appendChild(row);
     section.appendChild(cardsWrap);
 
@@ -999,19 +1016,19 @@ display(
       return;
     }
 
-    const selected = await getBarRaceConstituency();
+    const selected = await getBarRacePanel();
 
     if (!isCurrent()) return;
 
     if (!selected) {
-      el.innerHTML = `<p class="chart-loading">No bar-race data available for this constituency.</p>`;
+      el.innerHTML = `<p class="chart-loading">No bar-race data available for this panel.</p>`;
       return;
     }
 
     const chart = electionBarRace({
       data: selected,
       width: Math.max(760, Math.floor(el.clientWidth || 960)),
-      visibleBars: 10,
+      visibleBars: 11,
       barSize: 42,
       duration: 180
     });
@@ -1025,17 +1042,17 @@ display(
 
 <div class="prose-block">
   <h2>Explore the election as it happened</h2>
-  <p>Take an interactive look at how the general election unfolded in November 2024 and the story of each count.</p>
+  <p>Take an interactive look at how the Seanad general election unfolded in 2025 and the story of each count.</p>
 </div>
 
-<div class="section-driver-block">
+<div class="section-driver-block section-driver-block--timeline">
   <div class="section-driver-block__control">
 
 ```js
-electionTimelineControls({
+renderTimelineControls({
   state: window.electionsState,
   resultsPromise: getResults(),
-  getConstituency: () => getState().constituency,
+  getPanel: () => getState().panel,
   onChange: () => {
     window.dispatchEvent(new CustomEvent("elections:change"));
   }
@@ -1046,34 +1063,10 @@ electionTimelineControls({
 
   <div class="section-driver-block__intro">
     <p>
-      Dáil elections take place over multiple counts, during which votes in excess
-      of the quota or votes from eliminated candidates are redistributed. Chart shows percentage of quota attained by candidates by count.
+      Seanad panel elections unfold over multiple counts, with exclusions and transfers changing the standing of candidates. Chart shows the percentage of quota attained by each candidate at the selected count.
+    </p>
   </div>
 </div>
-
-```js
-display(
-  mountReactive("prose-block reactive-prose", async (el, { skeletonOnly, isCurrent }) => {
-    if (skeletonOnly) {
-      el.innerHTML = `
-        <div class="text-skeleton">
-          <div class="text-skeleton__line text-skeleton__line--w72 skeleton-shimmer"></div>
-        </div>
-      `;
-      return;
-    }
-
-    const { activeCount, maxCount } = await getActiveCountLabel();
-    const constituency = getState().constituency;
-
-    if (!isCurrent()) return;
-
-    el.innerHTML = `
-      <h3>Count ${activeCount} of ${maxCount} · ${constituency}</h3>
-    `;
-  })
-);
-```
 
 <div class="chart-block chart-block--wide">
 
@@ -1085,7 +1078,7 @@ display(
       return;
     }
 
-    const { rows, quota } = await getWaffleRows();
+    const { rows } = await getWaffleRows();
 
     if (!isCurrent()) return;
 
@@ -1108,11 +1101,13 @@ display(
       })
     );
 
-    wrap.appendChild(
-      renderQuotaWaffleChunk(secondRow, {
-        width: availableWidth
-      })
-    );
+    if (secondRow.length) {
+      wrap.appendChild(
+        renderQuotaWaffleChunk(secondRow, {
+          width: availableWidth
+        })
+      );
+    }
 
     el.replaceChildren(wrap);
   })
@@ -1123,7 +1118,7 @@ display(
 
 <div class="prose-block">
   <h2>Explore the vote standings through the counts</h2>
-  <p>Take a look at votes cast by party or by the status of candidates in the election.</p>
+  <p>Take a look at votes cast by subpanel or by the status of candidates in the poll.</p>
 </div>
 
 ```js
@@ -1146,9 +1141,9 @@ display(
       return;
     }
 
-    const [{ activeCount }, summary] = await Promise.all([
-      getActiveCountLabel(),
-      getConstituencySummary()
+    const [{ count }, summary] = await Promise.all([
+      getLollipopRows(),
+      getPanelSummary()
     ]);
 
     if (!isCurrent() || !summary) return;
@@ -1157,8 +1152,8 @@ display(
     intro.className = "section-local-control__intro";
     intro.innerHTML = `
       <p>
-        These were the vote standings after count No. <strong>${activeCount}</strong>
-        in <strong>${summary.constituency}</strong>.
+        These were the vote standings after <strong>count No. ${count}</strong>
+        for the <strong>${summary.panel}</strong>.
       </p>
       <p>
         The quota was <strong>${format(summary.quota)}</strong>.
@@ -1174,8 +1169,8 @@ display(
         name: "color-mode",
         value: getState().colorMode,
         options: [
-          { value: "party", label: "Party" },
-          { value: "status", label: "Candidate status" }
+          { value: "subPanel", label: "Subpanel" },
+          { value: "status", label: "Status" }
         ],
         onChange: (nextValue) => {
           window.electionsState.colorMode = nextValue;
@@ -1195,106 +1190,39 @@ display(
 display(
   mountReactive("", async (el, { skeletonOnly, isCurrent }) => {
     if (skeletonOnly) {
-      el.replaceChildren(chartPlaceholder(460));
+      el.replaceChildren(chartPlaceholder(760));
       return;
     }
 
-    const rows = await getCountRows();
-    const summary = await getConstituencySummary();
+    const { rows, quota, count } = await getLollipopRows();
 
     if (!isCurrent()) return;
 
-    if (!rows.length || !summary) {
-      el.innerHTML = `<p class="chart-loading">No data available for this count.</p>`;
+    if (!rows.length) {
+      el.innerHTML = `<p class="chart-loading">No standings data available for this count.</p>`;
       return;
     }
 
-    const quota = summary.quota ?? 0;
-    const colorChoices = getColorChoices(rows);
-    const colorChoice =
-      getState().colorMode === "status"
-        ? colorChoices.status
-        : colorChoices.party;
-
-    const plottedRows = rows
-      .map((d) => ({
-        ...d,
-        displayName: getDisplayNameFromElection(d.name),
-        stemStart: 0
-      }))
-      .sort((a, b) => d3.descending(a.votes, b.votes));
-
-    const availableWidth = Math.max(720, Math.floor(el.clientWidth || 790));
+    const colorChoice = getLollipopColorChoice(
+      getState().colorMode ?? "subPanel"
+    );
 
     const wrap = document.createElement("div");
     wrap.className = "election-chart-wrap";
 
-    wrap.appendChild(renderColorLegend(colorChoice));
-
-    const chart = Plot.plot({
-      width: availableWidth,
-      height: Math.max(420, plottedRows.length * 30 + 70),
-      marginBottom: 40,
-      marginLeft: 220,
-      marginRight: 80,
-      color: {
-        legend: false,
+    wrap.appendChild(
+      renderColorLegend({
         domain: colorChoice.domain,
         range: colorChoice.range
-      },
-      style: {
-        fontSize: 14,
-        fontFamily: "IBM Plex Sans"
-      },
-      x: {
-        tickPadding: 6,
-        tickSize: 5,
-        grid: true,
-        label: "Votes",
-        nice: true
-      },
-      y: {
-        label: null,
-        tickSize: 0,
-        domain: plottedRows.map((d) => d.displayName)
-      },
-      marks: [
-        Plot.ruleX([0]),
-        Plot.ruleX([quota], {
-          stroke: "#6b5922",
-          strokeDasharray: "4,4"
-        }),
-        Plot.link(plottedRows, {
-          x1: "stemStart",
-          x2: "votes",
-          y1: "displayName",
-          y2: "displayName",
-          stroke: colorChoice.field,
-          strokeWidth: 2.25
-        }),
-        Plot.dot(plottedRows, {
-          x: "votes",
-          y: "displayName",
-          fill: colorChoice.field,
-          stroke: colorChoice.field,
-          r: 5,
-          title: (d) =>
-            `After count No. ${d.count}, ${d.displayName}, ${d.party}, had ${format(d.votes)} votes, with the quota standing at ${format(quota)}.`
-        }),
-        Plot.text(plottedRows, {
-          x: "votes",
-          y: "displayName",
-          text: (d) => format(d.votes),
-          dx: 26,
-          textAnchor: "start",
-          lineAnchor: "middle",
-          fill: "#4a463d",
-          fontSize: 12
-        })
-      ]
-    });
+      })
+    );
 
-    fixPlotAria(chart);
+    const chart = renderLollipopChart(rows, {
+      width: Math.max(760, Math.floor(el.clientWidth || 790)),
+      quota,
+      count,
+      colorMode: getState().colorMode ?? "subPanel"
+    });
 
     wrap.appendChild(chart);
     el.replaceChildren(wrap);
@@ -1304,60 +1232,34 @@ display(
 
 </div>
 
+<div class="section-local-control">
+  <div class="section-local-control__intro">
+    <p>
+      For the selected count, explore candidates by <strong>status of poll</strong> or by <strong>surname</strong>.
+    </p>
+  </div>
+  <div class="section-local-control__control">
+
 ```js
 display(
-  mountReactive("section-local-control", async (el, { skeletonOnly, isCurrent }) => {
-    if (skeletonOnly) {
-      el.innerHTML = `
-        <div class="section-local-control__intro">
-          <div class="text-skeleton">
-            <div class="text-skeleton__line text-skeleton__line--w72 skeleton-shimmer"></div>
-          </div>
-        </div>
-        <div class="section-local-control__control">
-          <div class="text-skeleton">
-            <div class="text-skeleton__line text-skeleton__line--w72 skeleton-shimmer"></div>
-          </div>
-        </div>
-      `;
-      return;
+  renderSegmentedControl({
+    label: "Sort table by",
+    name: "table-sort",
+    value: getState().tableSort,
+    options: [
+      { value: "status", label: "Status of poll" },
+      { value: "surname", label: "Surname" }
+    ],
+    onChange: (nextValue) => {
+      window.electionsState.tableSort = nextValue;
+      window.dispatchEvent(new CustomEvent("elections:change"));
     }
-
-    const { activeCount } = await getActiveCountLabel();
-
-    if (!isCurrent()) return;
-
-    const intro = document.createElement("div");
-    intro.className = "section-local-control__intro";
-    intro.innerHTML = `
-      <p>
-        For count <strong>${activeCount}</strong>, explore votes alphabetically by surname or by candidate status.
-      </p>
-    `;
-
-    const control = document.createElement("div");
-    control.className = "section-local-control__control";
-
-    control.appendChild(
-      renderSegmentedControl({
-        label: "Sort table by",
-        name: "table-sort",
-        value: getState().tableSort,
-        options: [
-          { value: "status", label: "Count status" },
-          { value: "surname", label: "Surname" }
-        ],
-        onChange: (nextValue) => {
-          window.electionsState.tableSort = nextValue;
-          window.dispatchEvent(new CustomEvent("elections:change"));
-        }
-      })
-    );
-
-    el.replaceChildren(intro, control);
   })
 );
 ```
+
+  </div>
+</div>
 
 <div class="chart-block">
 
@@ -1378,29 +1280,31 @@ display(
       return;
     }
 
-    const statusOrder = new Map([
-      ["Elected", 0],
-      ["Continuing", 1],
-      ["Eliminated", 2]
-    ]);
-
     const sortedRows = rows
       .map((d) => ({
         ...d,
-        displayName: getDisplayNameFromElection(d.name),
-        surnameKey: clean(d.name).toLowerCase(),
-        statusRank: statusOrder.get(d.status) ?? 99
+        displayName: clean(d.name),
+        surnameKey: clean(d.surname ?? d.name).toLowerCase()
       }))
       .sort((a, b) => {
         const sortMode = getState().tableSort;
 
         if (sortMode === "surname") {
-          return d3.ascending(a.surnameKey, b.surnameKey);
+          return (
+            d3.ascending(a.surnameKey, b.surnameKey) ||
+            d3.ascending(a.displayName, b.displayName)
+          );
         }
 
+        const aInvalid = a.position === null || Number.isNaN(a.position);
+        const bInvalid = b.position === null || Number.isNaN(b.position);
+
+        if (aInvalid && !bInvalid) return 1;
+        if (bInvalid && !aInvalid) return -1;
+
         return (
-          d3.ascending(a.statusRank, b.statusRank) ||
-          d3.descending(a.votes ?? 0, b.votes ?? 0)
+          d3.ascending(a.position, b.position) ||
+          d3.ascending(a.surnameKey, b.surnameKey)
         );
       });
 
@@ -1414,26 +1318,22 @@ display(
       <thead>
         <tr>
           <th>Candidate</th>
-          <th>Party</th>
+          <th>Sub-panel</th>
           <th>Votes</th>
           <th>Transfer</th>
           <th>Status</th>
         </tr>
       </thead>
       <tbody>
-        ${sortedRows
-          .map(
-            (d) => `
-              <tr>
-                <td>${d.displayName}</td>
-                <td>${d.party ?? ""}</td>
-                <td>${format(d.votes ?? 0)}</td>
-                <td>${format(d.transfer ?? 0)}</td>
-                <td>${d.status ?? ""}</td>
-              </tr>
-            `
-          )
-          .join("")}
+        ${sortedRows.map((d) => `
+          <tr>
+            <td>${d.displayName}</td>
+            <td>${d.subPanel ?? ""}</td>
+            <td>${format(d.votes ?? 0)}</td>
+            <td>${format(d.transfer ?? 0)}</td>
+            <td>${d.status ?? ""}</td>
+          </tr>
+        `).join("")}
       </tbody>
     `;
 
@@ -1465,7 +1365,7 @@ display(
     el.innerHTML = `
       <h2>Explore by candidate</h2>
       <p>
-        This election had <strong>${options.length} candidates</strong>. Explore their electoral path with the dropdown list.
+        This panel had <strong>${options.length} candidates</strong>. Explore their electoral path with the dropdown list.
       </p>
     `;
   })
@@ -1480,6 +1380,7 @@ display(
         <div class="section-local-control__intro">
           <div class="text-skeleton">
             <div class="text-skeleton__line text-skeleton__line--w84 skeleton-shimmer"></div>
+            <div class="text-skeleton__line text-skeleton__line--w72 skeleton-shimmer"></div>
           </div>
         </div>
         <div class="section-local-control__control">
@@ -1498,13 +1399,14 @@ display(
       getCandidateNarrative()
     ]);
 
-    if (!isCurrent() || !candidateRecord.length || !narrative) return;
+    if (!isCurrent()) return;
 
     const intro = document.createElement("div");
     intro.className = "section-local-control__intro";
-    intro.innerHTML = `
-      <p>${narrative}</p>
-    `;
+
+    intro.innerHTML = candidateRecord.length && narrative
+      ? `<p>${narrative}</p>`
+      : `<p>Select a candidate to explore their progress through the counts.</p>`;
 
     const control = document.createElement("div");
     control.className = "section-local-control__control";
@@ -1539,6 +1441,7 @@ display(
     el.replaceChildren(intro, control);
   })
 );
+
 ```
 
 <div class="chart-block chart-block--wide">
@@ -1553,7 +1456,7 @@ display(
 
     const [candidateRecord, summary] = await Promise.all([
       getCandidateRecord(),
-      getConstituencySummary()
+      getPanelSummary()
     ]);
 
     if (!isCurrent()) return;
@@ -1571,23 +1474,23 @@ display(
 
     wrap.appendChild(
       renderColorLegend({
-        domain: ["Elected", "Continuing", "Eliminated"],
+        domain: ["Deemed Elected", "Continuing", "Excluded"],
         range: ["#ff7f0e", "#1f77b4", "#dadbdc"]
       })
     );
 
     const chart = Plot.plot({
       marginLeft: 70,
-      marginBottom: 40,
-      width: availableWidth,
-      height: 480,
+      marginBottom: 35,
       style: {
         fontSize: 14,
         fontFamily: "IBM Plex Sans"
       },
+      width: availableWidth,
+      height: 480,
       color: {
         legend: false,
-        domain: ["Elected", "Continuing", "Eliminated"],
+        domain: ["Deemed Elected", "Continuing", "Excluded"],
         range: ["#ff7f0e", "#1f77b4", "#dadbdc"]
       },
       x: {
@@ -1599,17 +1502,33 @@ display(
         label: "↑ Votes"
       },
       marks: [
+        () => {
+          const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          svg.innerHTML = `
+            <defs>
+              <linearGradient id="candidate-gradient" gradientTransform="rotate(90)">
+                <stop offset="100%" stop-color="#7F6C2E" stop-opacity="0.95"></stop>
+                <stop offset="90%" stop-color="#666666" stop-opacity="0.5"></stop>
+              </linearGradient>
+            </defs>
+          `;
+          return svg;
+        },
         Plot.barY(candidateRecord, {
           x: "count",
           y: "votes",
           fill: "status",
           title: (d) =>
-            `After count No. ${d.count}, ${d.displayName} had ${format(d.votes)} votes, with the quota standing at ${format(quota)} votes, and was ${String(d.status ?? "").toLowerCase()} in the count.`
+            `After count No. ${d.count}, ${d.displayName ?? d.name} had ${format(
+              d.votes
+            )} votes, with the quota standing at ${format(quota)} votes, and was ${
+              String(d.status ?? "").toLowerCase()
+            } in the count.`
         }),
         Plot.tickY(candidateRecord, {
           x: "count",
           y: "votes",
-          stroke: "party",
+          stroke: "subPanel",
           strokeWidth: 2
         }),
         Plot.ruleY([0])
@@ -1622,9 +1541,8 @@ display(
     el.replaceChildren(wrap);
   })
 );
-```
 
-</div>
+```
 
 <div class="chart-block">
 
@@ -1680,11 +1598,7 @@ display(
     el.replaceChildren(tableWrap);
   })
 );
-```
 
-</div>
-
-```js
 display(
   mountReactive("download-block", async (el, { skeletonOnly, isCurrent }) => {
     if (skeletonOnly) {
@@ -1697,21 +1611,27 @@ display(
     }
 
     const rows = await getResults();
-    const { constituency } = getState();
-    if (!isCurrent()) return;
+    const { panel } = getState();
 
-    const filteredRows = rows.filter((d) => d.constituency === constituency);
+    if (!isCurrent()) return;
+    if (!panel) {
+      el.innerHTML = `<p class="chart-loading">No panel selected.</p>`;
+      return;
+    }
+
+    const filteredRows = rows.filter((d) => d.panel === panel);
 
     const cleanedRows = filteredRows.map((d) => ({
-      constituency: d.constituency ?? "",
-      candidate: getDisplayNameFromElection(d.name) ?? "",
-      party: d.party ?? "",
+      panel: d.panel ?? "",
+      subPanel: d.subPanel ?? "",
+      candidate: clean(d.name) ?? "",
       count: d.count ?? "",
       votes: d.votes ?? 0,
       transfer: d.transfer ?? 0,
       status: d.status ?? "",
       quota: d.quota ?? 0,
-      seats: d.seats ?? 0
+      electedPosition: d.electedPosition ?? "",
+      electedCount: d.electedCount ?? ""
     }));
 
     const csv = "\uFEFF" + d3.csvFormat(cleanedRows);
@@ -1727,13 +1647,14 @@ display(
     }
     el.dataset.downloadUrl = url;
 
+    const safePanel = panel.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
     const link = document.createElement("a");
     link.className = "pq-download";
     link.href = url;
-    link.download = `${constituency.toLowerCase().replace(/\s+/g, "-")}-election-results-2024.csv`;
-    link.textContent = `Download full count-by-count dataset for ${constituency}`;
+    link.download = `${safePanel}-seanad-election-2025-counts.csv`;
+    link.textContent = `Download full count-by-count dataset for the ${panel}`;
 
     el.replaceChildren(link);
   })
 );
-```

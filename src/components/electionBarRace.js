@@ -1,19 +1,8 @@
 import * as d3 from "npm:d3";
 
-const DEFAULT_PARTY_COLORS = new Map([
-  ["Fianna Fáil", "#2c8737"],
-  ["Sinn Féin", "#088460"],
-  ["Fine Gael", "#303591"],
-  ["Independent", "#666666"],
-  ["Labour Party", "#c82832"],
-  ["Social Democrats", "#782b81"],
-  ["Independent Ireland", "#087b87"],
-  ["People Before Profit-Solidarity", "#be417d"],
-  ["Aontú", "#b35400"],
-  ["100% RDR", "#985564"],
-  ["Green Party", "#6c7e26"],
-  ["Irish Freedom Party", "#1f77b4"],
-  ["Liberty Republic", "#ff7f0e"],
+const DEFAULT_SUBPANEL_COLORS = new Map([
+  ["Nominating Bodies", "#1f77b4"],
+  ["Oireachtas", "#ff7f0e"],
 ]);
 
 export function electionBarRace({
@@ -22,7 +11,7 @@ export function electionBarRace({
   visibleBars = 10,
   barSize = 42,
   duration = 180,
-  partyColors = DEFAULT_PARTY_COLORS,
+  subPanelColors = DEFAULT_SUBPANEL_COLORS,
 } = {}) {
   const fallback = document.createElement("div");
   fallback.className = "chart-loading";
@@ -49,7 +38,6 @@ export function electionBarRace({
 
   const names = data.candidates.map((d) => d.name);
   const quota = Number(data.quota) || 0;
-  const seats = Number(data.seats) || 0;
   const maxCount =
     Number(data.maxCount) || d3.max(data.counts, (d) => Number(d.count)) || 1;
   const maxValue =
@@ -59,8 +47,8 @@ export function electionBarRace({
     ) ||
     1;
 
-  const partyByName = new Map(
-    data.candidates.map((candidate) => [candidate.name, candidate.party]),
+  const subPanelByName = new Map(
+    data.candidates.map((candidate) => [candidate.name, candidate.subPanel]),
   );
 
   const x = d3.scaleLinear([0, maxValue], [marginLeft, width - marginRight]);
@@ -71,8 +59,8 @@ export function electionBarRace({
     .rangeRound([marginTop, marginTop + barSize * (n + 1 + 0.15)])
     .padding(0.12);
 
-  function getPartyColor(name) {
-    return partyColors.get(partyByName.get(name)) ?? "#8a8578";
+  function getSubPanelColor(name) {
+    return subPanelColors.get(subPanelByName.get(name)) ?? "#8a8578";
   }
 
   function rank(value) {
@@ -219,15 +207,17 @@ export function electionBarRace({
         (enter) =>
           enter
             .append("rect")
-            .attr("fill", (d) => getPartyColor(d.name))
+            .attr("fill", (d) => getSubPanelColor(d.name))
             .attr("fill-opacity", (d) =>
-              getStatus(count, d.name) === "Eliminated" ? 0.35 : 1,
+              getStatus(count, d.name) === "Excluded" ? 0.35 : 1,
             )
             .attr("stroke", (d) =>
-              getStatus(count, d.name) === "Elected" ? "#7F6C2E" : "none",
+              getStatus(count, d.name) === "Deemed Elected"
+                ? "#7F6C2E"
+                : "none",
             )
             .attr("stroke-width", (d) =>
-              getStatus(count, d.name) === "Elected" ? 2 : 0,
+              getStatus(count, d.name) === "Deemed Elected" ? 2 : 0,
             )
             .attr("rx", 3)
             .attr("height", y.bandwidth())
@@ -247,14 +237,15 @@ export function electionBarRace({
       .transition(transition)
       .attr("y", (d) => y(d.rank))
       .attr("width", (d) => x(d.value) - x(0))
+      .attr("fill", (d) => getSubPanelColor(d.name))
       .attr("fill-opacity", (d) =>
-        getStatus(count, d.name) === "Eliminated" ? 0.35 : 1,
+        getStatus(count, d.name) === "Excluded" ? 0.35 : 1,
       )
       .attr("stroke", (d) =>
-        getStatus(count, d.name) === "Elected" ? "#7F6C2E" : "none",
+        getStatus(count, d.name) === "Deemed Elected" ? "#7F6C2E" : "none",
       )
       .attr("stroke-width", (d) =>
-        getStatus(count, d.name) === "Elected" ? 2 : 0,
+        getStatus(count, d.name) === "Deemed Elected" ? 2 : 0,
       );
   }
 
