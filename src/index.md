@@ -822,7 +822,7 @@ display(
       <div class="hero__overlay">
         <div class="hero__content">
           <p class="hero__eyebrow">Open data insights</p>
-          <h1 class="hero__title">Election Explorer: Seanad 2025</h1>
+          <h1 class="hero__title">Election Explorer: 27th Seanad</h1>
           <p class="hero__subtitle">
             A data-driven exploration of the 2025 Seanad general election.
           </p>
