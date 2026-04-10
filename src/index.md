@@ -1,5 +1,5 @@
 ---
-title: Overview
+title: "Seanad Éireann"
 header: false
 sidebar: false
 footer: false
