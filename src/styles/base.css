@@ -1,0 +1,340 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap");
+
+:root {
+    --page-bg: #f6f3ea;
+    --text: #4a463d;
+    --text-soft: #5f5a50;
+    --text-muted: #5c5649;
+    --accent: #4a463d;
+    --link: #5f4f1f;
+    --link-hover: #7f6c2e;
+    --border: #d4ccb8;
+    --button-border: #6b5922;
+    --chip-hover: #dedbd4;
+    --gold: #6b5922;
+    --gold-hover: #473a16;
+    --focus-ring: #3f3414;
+    --page-max: 1100px;
+    --text-max: 76ch;
+    --data-max: 92ch;
+    --chart-max: var(--data-max);
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.75rem;
+    --space-7: 2.25rem;
+    --space-8: 3rem;
+    --radius: 4px;
+    --shadow-soft: 0 6px 20px rgba(47, 47, 47, 0.06);
+}
+
+html {
+    background: var(--page-bg);
+}
+
+body {
+    margin: 0 auto;
+    background: var(--page-bg);
+    color: var(--text);
+    font-family:
+        "IBM Plex Sans",
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+main,
+.observablehq {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-5) var(--space-7);
+}
+
+.observablehq--block:has(> .hero),
+.observablehq--block:has(> .prose-block),
+.observablehq--block:has(> .reactive-prose),
+.observablehq--block:has(> .chart-caption),
+.observablehq--block:has(> .download-block),
+.observablehq--block:has(> .controls-block),
+.observablehq--block:has(> .section-local-control),
+.observablehq--block:has(.hero),
+.observablehq--block:has(.prose-block),
+.observablehq--block:has(.reactive-prose),
+.observablehq--block:has(.chart-caption),
+.observablehq--block:has(.download-block),
+.observablehq--block:has(.controls-block),
+.observablehq--block:has(.section-local-control) {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.hero {
+    position: relative;
+    max-width: var(--text-max);
+    margin: 0 auto var(--space-7);
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+}
+
+.hero__media {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    background: #000;
+}
+
+.hero__video,
+.hero__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero__video {
+    opacity: 0.78;
+}
+
+.hero__image {
+    object-position: center;
+    opacity: 0.84;
+}
+
+.hero__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: flex-end;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.72),
+        rgba(0, 0, 0, 0.4),
+        rgba(0, 0, 0, 0.05)
+    );
+    pointer-events: none;
+}
+
+.hero__content {
+    max-width: var(--text-max);
+    width: 100%;
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-5);
+    box-sizing: border-box;
+    color: #fff;
+}
+
+.hero__eyebrow {
+    margin: 0 0 0.35rem 0;
+    max-width: none;
+    color: #f1df9b;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 1;
+}
+
+.hero__title {
+    margin: 0 0 0.45rem 0;
+    max-width: 20ch;
+    color: #fff;
+    font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: 0;
+}
+
+.hero__subtitle {
+    margin: 0;
+    max-width: 60ch;
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1.5;
+    opacity: 0.95;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    margin: 0 0 var(--space-3);
+    color: var(--accent);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: 0;
+}
+
+h1 {
+    font-size: clamp(2rem, 3vw, 2.6rem);
+    margin-bottom: var(--space-4);
+}
+
+h2,
+.observablehq h2,
+main h2 {
+    font-size: clamp(1.3rem, 2vw, 1.6rem);
+    margin-top: var(--space-5);
+    margin-bottom: var(--space-3);
+    padding-top: 0 !important;
+    border-top: 0 !important;
+    box-shadow: none !important;
+}
+
+h3 {
+    font-size: 1.1rem;
+    margin-top: var(--space-5);
+}
+
+p,
+ul,
+ol {
+    max-width: var(--text-max);
+    margin: 0 0 var(--space-3);
+}
+
+strong {
+    font-weight: 600;
+}
+
+a {
+    color: var(--link);
+    text-decoration: none;
+}
+
+a:hover,
+a:focus-visible {
+    color: var(--link-hover);
+    text-decoration: underline;
+}
+
+.max-text {
+    max-width: var(--text-max);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.prose-block {
+    max-width: var(--text-max);
+    margin: 0.65rem auto 0.45rem;
+}
+
+.prose-block p:last-child {
+    margin-bottom: 0;
+}
+
+.max-text.lead,
+.prose-block.lead {
+    color: var(--text-soft);
+    font-size: 1.05rem;
+    line-height: 1.65;
+}
+
+.reactive-prose {
+    max-width: var(--text-max);
+    margin: 0.45rem auto 0.7rem;
+    padding: 0;
+}
+
+.reactive-prose h2,
+.reactive-prose h3,
+.reactive-prose h4 {
+    margin: 0 0 0.35rem;
+    color: var(--accent);
+    line-height: 1.25;
+}
+
+.reactive-prose h3 {
+    font-size: 1.05rem;
+}
+
+.reactive-prose p {
+    max-width: none;
+    margin: 0 0 var(--space-2) 0;
+}
+
+.reactive-prose p:last-child {
+    margin-bottom: 0;
+}
+
+.reactive-prose .observablehq-header-anchor {
+    display: none;
+}
+
+.chart-block {
+    max-width: var(--data-max);
+    margin: 0 auto 0.35rem;
+    padding: 0;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.chart-block--wide {
+    max-width: var(--data-max);
+}
+
+.chart-block,
+.chart-block .observablehq,
+.chart-block .observablehq--block,
+.chart-block .observablehq--block > * {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.chart-block svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.chart-caption {
+    display: block;
+    max-width: var(--text-max);
+    margin: 0 auto 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+.chart-loading {
+    max-width: var(--text-max);
+    margin: 0.2rem auto 0.6rem;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+}
+
+@media (max-width: 720px) {
+    .hero__media {
+        height: 240px;
+    }
+
+    .hero__content {
+        padding: var(--space-5) var(--space-4);
+    }
+
+    .hero__title {
+        font-size: 1.6rem;
+    }
+
+    .hero__subtitle {
+        font-size: 0.95rem;
+    }
+
+    main,
+    .observablehq {
+        padding: var(--space-4) var(--space-4) var(--space-6);
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+}
