@@ -226,6 +226,32 @@ a:focus-visible {
     margin: 0.65rem auto 0.45rem;
 }
 
+.prose-block a[href^="http"] {
+    color: var(--text-soft);
+    text-decoration: none;
+    transition: color 0.25s ease;
+}
+
+.prose-block a[href^="http"]:hover,
+.prose-block a[href^="http"]:focus-visible {
+    color: var(--link-hover);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+.prose-block a[href^="http"]::after {
+    content: " ↗";
+    font-size: 0.85em;
+    color: var(--text-muted);
+    transition: color 0.25s ease;
+}
+
+.prose-block a[href^="http"]:hover::after,
+.prose-block a[href^="http"]:focus-visible::after {
+    color: var(--link-hover);
+}
+
 .prose-block p:last-child {
     margin-bottom: 0;
 }
