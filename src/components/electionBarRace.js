@@ -1,4 +1,4 @@
-import * as d3 from "npm:d3";
+import * as d3 from "npm:d3@7.9.0";
 
 const DEFAULT_SUBPANEL_COLORS = new Map([
   ["Nominating Bodies", "#1f77b4"],

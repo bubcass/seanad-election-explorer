@@ -1,6 +1,7 @@
 {
   "type": "module",
   "private": true,
+  "packageManager": "npm@10.9.2",
   "scripts": {
     "clean": "rimraf src/.observablehq/cache",
     "build": "observable build",
@@ -9,18 +10,20 @@
     "build:election-normalised": "node src/data/transformers/normalize-election-2024.js",
     "build:election-final": "node src/data/transformers/build-final-rows.js",
     "build:election-data": "npm run build:election-normalised && npm run build:election-final",
-    "observable": "observable"
-  },
-  "dependencies": {
-    "@observablehq/framework": "^1.13.4",
-    "d3": "^7.9.0",
-    "d3-dsv": "^3.0.1"
+    "observable": "observable",
+    "security:audit": "npm audit --audit-level=critical",
+    "security:runtime": "npm audit --omit=dev --audit-level=high",
+    "verify": "npm run build && npm run security:runtime"
   },
   "devDependencies": {
-    "gh-pages": "^6.1.1",
-    "rimraf": "^5.0.5"
+    "@observablehq/framework": "1.13.4",
+    "d3": "7.9.0",
+    "d3-dsv": "3.0.1",
+    "gh-pages": "6.3.0",
+    "leaflet": "1.9.4",
+    "rimraf": "5.0.10"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22.12.0 <25"
   }
 }

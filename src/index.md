@@ -7,8 +7,8 @@ toc: false
 ---
 
 ```js
-import * as d3 from "npm:d3";
-import * as Plot from "npm:@observablehq/plot";
+import * as d3 from "npm:d3@7.9.0";
+import * as Plot from "npm:@observablehq/plot@0.6.17";
 import { electionBarRace } from "./components/electionBarRace.js";
 import { panelSelect } from "./components/panel-select.js";
 import { renderTimelineControls } from "./components/renderTimelineControls.js";

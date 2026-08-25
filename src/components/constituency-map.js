@@ -1,4 +1,4 @@
-import L from "npm:leaflet";
+import L from "npm:leaflet@1.9.4";
 
 const BLANK_TILE =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
